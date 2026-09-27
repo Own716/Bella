@@ -322,7 +322,7 @@ fun GroupsScreen(
                     OutlinedTextField(
                         value = tag,
                         onValueChange = { tag = it },
-                        label = { Text("Tag") },
+                        label = { Text(s.groupsTag) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -381,7 +381,7 @@ fun GroupsScreen(
                         OutlinedTextField(
                             value = url,
                             onValueChange = { url = it },
-                            label = { Text("Probe URL") },
+                            label = { Text(s.groupsProbeUrl) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -392,7 +392,7 @@ fun GroupsScreen(
                             OutlinedTextField(
                                 value = interval,
                                 onValueChange = { interval = it },
-                                label = { Text("Interval (min)") },
+                                label = { Text(s.groupsIntervalMin) },
                                 shape = BellaShapes.small,
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
@@ -400,7 +400,7 @@ fun GroupsScreen(
                             OutlinedTextField(
                                 value = tolerance,
                                 onValueChange = { tolerance = it },
-                                label = { Text("Tolerance (ms)") },
+                                label = { Text(s.groupsToleranceMs) },
                                 shape = BellaShapes.small,
                                 modifier = Modifier.weight(1f),
                                 singleLine = true

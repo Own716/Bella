@@ -261,9 +261,9 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("TCP/IP Stack", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text(s.settingsTunStackTitle, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                         Text(
-                            "Sing-box 1.15 High-Performance Stack",
+                            s.settingsTunStackDesc,
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.primary
                         )

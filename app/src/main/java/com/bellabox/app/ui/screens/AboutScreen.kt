@@ -120,7 +120,7 @@ fun AboutScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = if (s.aboutTitle.contains("关于")) "现代化 Android Sing-box 代理客户端" else "Next-Generation Android Proxy Client",
+                    text = s.aboutAppSubtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -129,7 +129,7 @@ fun AboutScreen(
 
                 InfoRow(label = s.aboutAppVersion, value = "1.0.1-preview (Build 101)")
                 InfoRow(label = s.aboutKernelBuild, value = SingboxEngineAdapter.getCoreVersion())
-                InfoRow(label = if (s.aboutTitle.contains("关于")) "通道分支" else "Core Channel", value = "${SingboxEngineAdapter.CORE_CHANNEL} (${SingboxEngineAdapter.CORE_COMMIT})")
+                InfoRow(label = s.aboutCoreChannel, value = "${SingboxEngineAdapter.CORE_CHANNEL} (${SingboxEngineAdapter.CORE_COMMIT})")
                 InfoRow(label = "libbox", value = SingboxEngineAdapter.getCoreVersion())
                 InfoRow(label = s.aboutArch, value = "arm64-v8a")
                 InfoRow(label = "Android", value = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
@@ -209,7 +209,7 @@ fun AboutScreen(
                     }
                 } else {
                     Text(
-                        text = if (s.aboutTitle.contains("关于")) "BellaBox 紧跟 Sing-box 官方最新内核与测试通道。" else "BellaBox strictly tracks official Sing-box latest alpha & testing releases.",
+                        text = s.aboutTrackUpdates,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -238,7 +238,7 @@ fun AboutScreen(
                 Column {
                     Text(s.aboutViewLogs, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Text(
-                        text = if (s.aboutTitle.contains("关于")) "查看实时脱敏运行与调试日志" else "Inspect real-time sanitized debug logs",
+                        text = s.aboutLogsDesc,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -260,7 +260,7 @@ fun AboutScreen(
                     Icon(imageVector = Icons.Rounded.Security, contentDescription = "License", tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (s.aboutTitle.contains("关于")) "开源许可证" else "Open Source License",
+                        text = s.aboutLicense,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

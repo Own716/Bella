@@ -562,7 +562,7 @@ fun NodesScreen(
                         value = subName,
                         onValueChange = { subName = it },
                         label = { Text(s.dialogSubName) },
-                        placeholder = { Text("My Subscription") },
+                        placeholder = { Text(s.nodesSubNamePlaceholder) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -572,7 +572,7 @@ fun NodesScreen(
                         value = subUrl,
                         onValueChange = { subUrl = it },
                         label = { Text(s.dialogSubUrl) },
-                        placeholder = { Text("https://example.com/sub") },
+                        placeholder = { Text(s.nodesSubUrlPlaceholder) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -708,8 +708,8 @@ fun NodesScreen(
                             shareLink = it
                             isError = false
                         },
-                        label = { Text("Proxy URL") },
-                        placeholder = { Text("vless://, vmess://, trojan://, ss://, hy2://, tuic://, wg://") },
+                        label = { Text(s.nodesProxyUrl) },
+                        placeholder = { Text(s.nodesProxyUrlPlaceholder) },
                         shape = BellaShapes.small,
                         isError = isError,
                         modifier = Modifier.fillMaxWidth()
@@ -796,7 +796,7 @@ fun NodesScreen(
                         OutlinedTextField(
                             value = uuid,
                             onValueChange = { uuid = it },
-                            label = { Text("UUID") },
+                            label = { Text(s.nodesUuid) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -807,7 +807,7 @@ fun NodesScreen(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("Password") },
+                            label = { Text(s.nodesPassword) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -817,7 +817,7 @@ fun NodesScreen(
                     OutlinedTextField(
                         value = sni,
                         onValueChange = { sni = it },
-                        label = { Text("SNI") },
+                        label = { Text(s.nodesSni) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true

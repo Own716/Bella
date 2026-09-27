@@ -55,7 +55,7 @@ class VpnNotificationManager(private val context: Context) {
         )
 
         val isZh = context.getSharedPreferences("bellabox_settings", Context.MODE_PRIVATE)
-            .getString("app_language", "zh") != "en"
+            .getString("pref_language", "zh") != "en"
 
         val title = when (state) {
             ConnectionState.CONNECTED -> if (isZh) "BellaBox: 已安全连接" else "BellaBox: Connected"

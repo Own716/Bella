@@ -112,6 +112,19 @@ interface AppStrings {
     val groupsEmptyTitle: String
     val groupsEmptyDesc: String
     val groupsSelectAtLeastOne: String
+    val groupsTag: String
+    val groupsProbeUrl: String
+    val groupsIntervalMin: String
+    val groupsToleranceMs: String
+
+    // Nodes Screen additions
+    val nodesSubNamePlaceholder: String
+    val nodesSubUrlPlaceholder: String
+    val nodesProxyUrl: String
+    val nodesProxyUrlPlaceholder: String
+    val nodesUuid: String
+    val nodesPassword: String
+    val nodesSni: String
 
     // Rules Screen
     val rulesTitle: String
@@ -131,6 +144,8 @@ interface AppStrings {
     val rulesPayload: String
     val rulesPayloadHint: String
     val rulesDescription: String
+    val rulesNamePlaceholder: String
+    val rulesOutboundTag: String
     val rulesEnabled: String
     val rulesEmptyTitle: String
     val rulesEmptyDesc: String
@@ -183,6 +198,8 @@ interface AppStrings {
     val settingsAutoReconnectNet: String
     val settingsAutoReconnectNetDesc: String
     val settingsTunStack: String
+    val settingsTunStackTitle: String
+    val settingsTunStackDesc: String
     val settingsTunMtu: String
     val settingsTunMtuDesc: String
     val settingsTunStrictRoute: String
@@ -203,18 +220,23 @@ interface AppStrings {
 
     // About Screen
     val aboutTitle: String
+    val aboutAppSubtitle: String
     val aboutCoreStatus: String
     val aboutAppVersion: String
+    val aboutCoreChannel: String
     val aboutKernelBuild: String
     val aboutArch: String
     val aboutCheckUpdate: String
     val aboutChecking: String
     val aboutUpToDate: String
+    val aboutTrackUpdates: String
     val aboutNewVersionAvailable: (String) -> String
     val aboutViewLogs: String
+    val aboutLogsDesc: String
     val aboutKernelLogs: String
     val aboutCopyLogs: String
     val aboutLogsCopied: String
+    val aboutLicense: String
     val aboutClose: String
     val aboutNoLogs: String
 }
@@ -322,6 +344,18 @@ object ZhStrings : AppStrings {
     override val groupsEmptyTitle = "暂无策略组"
     override val groupsEmptyDesc = "点击右下角按钮创建自定义策略组"
     override val groupsSelectAtLeastOne = "请至少勾选一个节点"
+    override val groupsTag = "分组标识 (Tag)"
+    override val groupsProbeUrl = "测速 URL"
+    override val groupsIntervalMin = "检测间隔 (分钟)"
+    override val groupsToleranceMs = "容错阈值 (毫秒)"
+
+    override val nodesSubNamePlaceholder = "例如：我的优质节点"
+    override val nodesSubUrlPlaceholder = "https://example.com/sub"
+    override val nodesProxyUrl = "节点分享链接"
+    override val nodesProxyUrlPlaceholder = "vless://, vmess://, trojan://, ss://, hy2://, tuic://, wg://"
+    override val nodesUuid = "用户 ID (UUID)"
+    override val nodesPassword = "连接密码"
+    override val nodesSni = "服务器名称指示 (SNI)"
 
     override val rulesTitle = "路由分流规则"
     override val rulesSubtitle = "高优先级规则自上而下匹配执行"
@@ -340,6 +374,8 @@ object ZhStrings : AppStrings {
     override val rulesPayload = "匹配内容 (Payload)"
     override val rulesPayloadHint = "例如: google.com 或 10.0.0.0/8"
     override val rulesDescription = "规则描述"
+    override val rulesNamePlaceholder = "例如：国内直连"
+    override val rulesOutboundTag = "出站标签 (可选，默认 proxy)"
     override val rulesEnabled = "启用此规则"
     override val rulesEmptyTitle = "暂无分流规则"
     override val rulesEmptyDesc = "点击右上角按钮恢复默认规则或添加自定义规则"
@@ -390,6 +426,8 @@ object ZhStrings : AppStrings {
     override val settingsAutoReconnectNet = "网络切换自动重连"
     override val settingsAutoReconnectNetDesc = "Wi-Fi 与蜂窝数据切换时无缝保持在线"
     override val settingsTunStack = "内核网络栈 (TUN)"
+    override val settingsTunStackTitle = "TCP/IP 协议栈"
+    override val settingsTunStackDesc = "Sing-box 1.15 高性能网络栈"
     override val settingsTunMtu = "TUN 网卡 MTU"
     override val settingsTunMtuDesc = "默认 9000，推荐范围 1280 - 9000"
     override val settingsTunStrictRoute = "严格全局路由 (Strict Route)"
@@ -409,18 +447,23 @@ object ZhStrings : AppStrings {
     override val settingsAboutKernelDesc = "内核版本与系统信息"
 
     override val aboutTitle = "关于 BellaBox"
+    override val aboutAppSubtitle = "现代化 Android Sing-box 代理客户端"
     override val aboutCoreStatus = "核心组件状态"
     override val aboutAppVersion = "客户端版本"
+    override val aboutCoreChannel = "通道分支"
     override val aboutKernelBuild = "内核版本"
     override val aboutArch = "芯片架构"
     override val aboutCheckUpdate = "检查内核更新"
     override val aboutChecking = "检查中…"
     override val aboutUpToDate = "当前内核已是最新版本"
+    override val aboutTrackUpdates = "BellaBox 紧跟 Sing-box 官方最新内核与测试通道。"
     override val aboutNewVersionAvailable: (String) -> String = { "发现内核新版本: $it" }
     override val aboutViewLogs = "查看实时内核运行日志"
+    override val aboutLogsDesc = "查看实时脱敏运行与调试日志"
     override val aboutKernelLogs = "实时内核运行日志"
     override val aboutCopyLogs = "复制日志"
     override val aboutLogsCopied = "日志已复制到剪贴板"
+    override val aboutLicense = "开源许可证"
     override val aboutClose = "关闭"
     override val aboutNoLogs = "暂无内核日志输出"
 }
@@ -528,6 +571,18 @@ object EnStrings : AppStrings {
     override val groupsEmptyTitle = "No Strategy Groups"
     override val groupsEmptyDesc = "Click the bottom right button to create a custom group"
     override val groupsSelectAtLeastOne = "Please select at least one node"
+    override val groupsTag = "Group Tag"
+    override val groupsProbeUrl = "Probe URL"
+    override val groupsIntervalMin = "Interval (min)"
+    override val groupsToleranceMs = "Tolerance (ms)"
+
+    override val nodesSubNamePlaceholder = "e.g. My Subscription"
+    override val nodesSubUrlPlaceholder = "https://example.com/sub"
+    override val nodesProxyUrl = "Proxy URL"
+    override val nodesProxyUrlPlaceholder = "vless://, vmess://, trojan://, ss://, hy2://, tuic://, wg://"
+    override val nodesUuid = "UUID"
+    override val nodesPassword = "Password"
+    override val nodesSni = "SNI"
 
     override val rulesTitle = "Routing Rules"
     override val rulesSubtitle = "Top-to-bottom rule match priority evaluation"
@@ -546,6 +601,8 @@ object EnStrings : AppStrings {
     override val rulesPayload = "Payload"
     override val rulesPayloadHint = "e.g. google.com or 10.0.0.0/8"
     override val rulesDescription = "Description"
+    override val rulesNamePlaceholder = "e.g. Direct China"
+    override val rulesOutboundTag = "Outbound Tag (optional, default proxy)"
     override val rulesEnabled = "Enable this rule"
     override val rulesEmptyTitle = "No Routing Rules"
     override val rulesEmptyDesc = "Click the top right button to reset to defaults or add custom rules"
@@ -596,6 +653,8 @@ object EnStrings : AppStrings {
     override val settingsAutoReconnectNet = "Auto-reconnect on Network Change"
     override val settingsAutoReconnectNetDesc = "Maintain active connection across Wi-Fi and mobile data"
     override val settingsTunStack = "Kernel Network Stack (TUN)"
+    override val settingsTunStackTitle = "TCP/IP Stack"
+    override val settingsTunStackDesc = "Sing-box 1.15 High-Performance Stack"
     override val settingsTunMtu = "TUN MTU"
     override val settingsTunMtuDesc = "Default 9000, recommended 1280 - 9000"
     override val settingsTunStrictRoute = "Strict Route"
@@ -615,18 +674,23 @@ object EnStrings : AppStrings {
     override val settingsAboutKernelDesc = "Kernel version and system diagnostics"
 
     override val aboutTitle = "About BellaBox"
+    override val aboutAppSubtitle = "Next-Generation Android Proxy Client"
     override val aboutCoreStatus = "Core Components"
     override val aboutAppVersion = "Client Version"
+    override val aboutCoreChannel = "Core Channel"
     override val aboutKernelBuild = "Kernel Version"
     override val aboutArch = "Architecture"
     override val aboutCheckUpdate = "Check Kernel Update"
     override val aboutChecking = "Checking…"
     override val aboutUpToDate = "Kernel is up to date"
+    override val aboutTrackUpdates = "BellaBox strictly tracks official Sing-box latest alpha & testing releases."
     override val aboutNewVersionAvailable: (String) -> String = { "New kernel version found: $it" }
     override val aboutViewLogs = "View Real-Time Kernel Logs"
+    override val aboutLogsDesc = "Inspect real-time sanitized debug logs"
     override val aboutKernelLogs = "Real-Time Kernel Logs"
     override val aboutCopyLogs = "Copy Logs"
     override val aboutLogsCopied = "Logs copied to clipboard"
+    override val aboutLicense = "Open Source License"
     override val aboutClose = "Close"
     override val aboutNoLogs = "No kernel log output"
 }

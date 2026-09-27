@@ -56,9 +56,10 @@ class MainActivity : ComponentActivity() {
             homeViewModel.connect()
         } else {
             val isZh = settingsViewModel.language.value != "en"
+            val s = if (isZh) com.bellabox.app.ui.i18n.ZhStrings else com.bellabox.app.ui.i18n.EnStrings
             Toast.makeText(
                 this,
-                if (isZh) "VPN 权限未授予，无法建立代理通道" else "VPN permission denied",
+                s.vpnPermissionDenied,
                 Toast.LENGTH_SHORT
             ).show()
         }

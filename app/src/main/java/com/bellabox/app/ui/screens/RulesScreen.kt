@@ -341,7 +341,7 @@ fun RulesScreen(
                         value = name,
                         onValueChange = { name = it },
                         label = { Text(s.rulesDescription) },
-                        placeholder = { Text("e.g. Direct China") },
+                        placeholder = { Text(s.rulesNamePlaceholder) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -436,7 +436,7 @@ fun RulesScreen(
                         OutlinedTextField(
                             value = outboundTag,
                             onValueChange = { outboundTag = it },
-                            label = { Text("Outbound Tag (optional, default proxy)") },
+                            label = { Text(s.rulesOutboundTag) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
