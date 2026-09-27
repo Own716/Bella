@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">BellaBox</string>
+    <string name="nav_home">ホーム</string>
+    <string name="nav_nodes">ノード</string>
+    <string name="nav_groups">ポリシー</string>
+    <string name="nav_rules">ルーティング</string>
+    <string name="nav_tools">ツール</string>
+    <string name="nav_settings">設定</string>
+    <string name="nav_about">情報</string>
+
+    <string name="status_idle">未接続</string>
+    <string name="status_starting">サービス開始中&#8230;</string>
+    <string name="status_connecting">トンネル接続中&#8230;</string>
+    <string name="status_connected">接続完了</string>
+    <string name="status_reconnecting">再接続中&#8230;</string>
+    <string name="status_stopping">切断中&#8230;</string>
+    <string name="status_stopped">停止</string>
+    <string name="status_failed">接続に失敗しました</string>
+
+    <string name="action_connect">接続</string>
+    <string name="action_disconnect">切断</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="action_save">保存</string>
+    <string name="action_delete">削除</string>
+    <string name="action_test_speed">速度テスト</string>
+    <string name="action_add_node">ノード追加</string>
+    <string name="action_import_sub">購読インポート</string>
+
+    <string name="card_active_node">現在の出口ノード</string>
+    <string name="card_live_traffic">リアルタイム速度</string>
+    <string name="card_total_traffic">合計通信量</string>
+    <string name="card_network_info">ネットワーク状態</string>
+    <string name="card_latency">遅延</string>
+    <string name="card_uplink">送信速度</string>
+    <string name="card_downlink">受信速度</string>
+
+    <string name="nodes_empty_title">プロキシノードがありません</string>
+    <string name="nodes_empty_desc">購読リンクをインポートするか、手動でノードを追加してください。</string>
+    <string name="nodes_search_hint">ノード名、国、またはプロトコルで検索</string>
+    <string name="nodes_sort_latency">最小遅延順</string>
+    <string name="nodes_sort_name">名前順</string>
+    <string name="nodes_sort_default">デフォルト順</string>
+
+    <string name="groups_title">ポリシーグループ</string>
+    <string name="rules_title">ルーティングルール</string>
+    <string name="dns_title">DNS構成</string>
+    <string name="speedtest_title">速度＆品質テスト</string>
+    <string name="tools_title">ネットワークツール</string>
+    <string name="settings_title">詳細設定</string>
+    <string name="about_title">BellaBox について</string>
+
+    <string name="vpn_permission_required">ネットワークトラフィックを代理送信するにはVPN権限が必要です。</string>
+</resources>

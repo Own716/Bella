@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">BellaBox</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_nodes">节点</string>
+    <string name="nav_groups">策略</string>
+    <string name="nav_rules">分流</string>
+    <string name="nav_tools">工具</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_about">关于</string>
+
+    <string name="status_idle">未连接</string>
+    <string name="status_starting">正在初始化服务&#8230;</string>
+    <string name="status_connecting">正在建立安全通道&#8230;</string>
+    <string name="status_connected">已连接</string>
+    <string name="status_reconnecting">网络自愈重连中&#8230;</string>
+    <string name="status_stopping">正在安全断开&#8230;</string>
+    <string name="status_stopped">已停止</string>
+    <string name="status_failed">连接发生异常</string>
+
+    <string name="action_connect">立即连接</string>
+    <string name="action_disconnect">断开连接</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_save">保存</string>
+    <string name="action_delete">删除</string>
+    <string name="action_test_speed">测速</string>
+    <string name="action_add_node">添加节点</string>
+    <string name="action_import_sub">导入订阅</string>
+
+    <string name="card_active_node">当前出口节点</string>
+    <string name="card_live_traffic">实时流速</string>
+    <string name="card_total_traffic">累计流量</string>
+    <string name="card_network_info">网络状态</string>
+    <string name="card_latency">真实延迟</string>
+    <string name="card_uplink">上传速度</string>
+    <string name="card_downlink">下载速度</string>
+
+    <string name="nodes_empty_title">暂无可用代理节点</string>
+    <string name="nodes_empty_desc">请导入您的订阅链接或手动添加节点以开始使用。</string>
+    <string name="nodes_search_hint">搜索节点名称、地区或协议</string>
+    <string name="nodes_sort_latency">最低延迟</string>
+    <string name="nodes_sort_name">名称排序</string>
+    <string name="nodes_sort_default">默认排序</string>
+
+    <string name="groups_title">智能策略组</string>
+    <string name="rules_title">分流规则</string>
+    <string name="dns_title">DNS 架构配置</string>
+    <string name="speedtest_title">多维真实测速</string>
+    <string name="tools_title">网络工具箱</string>
+    <string name="settings_title">偏好设置</string>
+    <string name="about_title">关于 BellaBox</string>
+
+    <string name="vpn_permission_required">需要授予 VPN 权限以接管并代理系统网络流量。</string>
+</resources>
