@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,13 +22,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Speed
@@ -39,10 +37,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -68,8 +62,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bellabox.app.ui.components.NodeCard
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
-import com.bellabox.app.ui.theme.StatusConnected
 import com.bellabox.core.model.ProtocolType
 import com.bellabox.core.model.ProxyNode
 import com.bellabox.core.model.Subscription
@@ -77,7 +71,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodesScreen(
     viewModel: NodesViewModel,
@@ -85,6 +78,8 @@ fun NodesScreen(
     onSelectNode: (ProxyNode) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val s = LocalAppStrings.current
+
     val nodes by viewModel.nodes.collectAsState()
     val subscriptions by viewModel.subscriptions.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -99,13 +94,16 @@ fun NodesScreen(
     // Dialog States
     var showImportUrlDialog by remember { mutableStateOf(false) }
     var showAddSubDialog by remember { mutableStateOf(false) }
-    var showAddManualNodeDialog by remember { mutableStateOf(false) }
     var editingNode by remember { mutableStateOf<ProxyNode?>(null) }
     var deletingNode by remember { mutableStateOf<ProxyNode?>(null) }
     var editingSub by remember { mutableStateOf<Subscription?>(null) }
     var deletingSub by remember { mutableStateOf<Subscription?>(null) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -115,18 +113,18 @@ fun NodesScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 8.dp),
+                    .padding(top = 12.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
                     Text(
-                        text = if (selectedTabIndex == 0) "节点列表" else "订阅管理",
+                        text = if (selectedTabIndex == 0) s.nodesTabNodes else s.nodesTabSubscriptions,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = if (selectedTabIndex == 0) "共 ${nodes.size} 个可用节点" else "共 ${subscriptions.size} 个托管订阅",
+                        text = if (selectedTabIndex == 0) s.nodesCountFormat(nodes.size) else s.subsCountFormat(subscriptions.size),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -149,17 +147,17 @@ fun NodesScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("测速中&#8230;", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(s.nodesTesting, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         } else {
                             Icon(imageVector = Icons.Rounded.Speed, contentDescription = "Test", modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("全部测速", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(s.nodesTestAll, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
 
-            // Tabs: [节点列表 | 订阅管理]
+            // Tabs: [Nodes | Subscriptions]
             TabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier
@@ -171,12 +169,12 @@ fun NodesScreen(
                 Tab(
                     selected = selectedTabIndex == 0,
                     onClick = { selectedTabIndex = 0 },
-                    text = { Text("节点列表 (${nodes.size})", fontWeight = FontWeight.Bold) }
+                    text = { Text("${s.nodesTabNodes} (${nodes.size})", fontWeight = FontWeight.Bold) }
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
                     onClick = { selectedTabIndex = 1 },
-                    text = { Text("订阅管理 (${subscriptions.size})", fontWeight = FontWeight.Bold) }
+                    text = { Text("${s.nodesTabSubscriptions} (${subscriptions.size})", fontWeight = FontWeight.Bold) }
                 )
             }
 
@@ -226,7 +224,7 @@ fun NodesScreen(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
                     shape = BellaShapes.medium,
-                    placeholder = { Text("搜索节点名称、服务器或协议", fontSize = 13.sp) },
+                    placeholder = { Text(s.nodesSearchHint, fontSize = 13.sp) },
                     leadingIcon = {
                         Icon(imageVector = Icons.Rounded.Search, contentDescription = "Search", modifier = Modifier.size(20.dp))
                     },
@@ -251,7 +249,7 @@ fun NodesScreen(
                         FilterChip(
                             selected = selectedProtocol == null,
                             onClick = { viewModel.setProtocolFilter(null) },
-                            label = { Text("全部协议", fontSize = 12.sp) },
+                            label = { Text(s.nodesFilterAll, fontSize = 12.sp) },
                             shape = BellaShapes.small
                         )
                     }
@@ -297,13 +295,13 @@ fun NodesScreen(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "暂无可用节点",
+                                    text = s.nodesEmptyTitle,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "导入订阅或添加分享链接即可快速畅联",
+                                    text = s.nodesEmptyDesc,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -313,14 +311,14 @@ fun NodesScreen(
                                     shape = BellaShapes.medium,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("添加订阅")
+                                    Text(s.nodesActionAddSub)
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 TextButton(
                                     onClick = { showImportUrlDialog = true },
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("导入分享链接")
+                                    Text(s.nodesActionImportLink)
                                 }
                             }
                         }
@@ -374,13 +372,13 @@ fun NodesScreen(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "暂无托管订阅",
+                                    text = s.subsEmptyTitle,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = "添加订阅链接后，系统将自动定时更新并智能保留节点收藏与测速记录。",
+                                    text = s.subsEmptyDesc,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -391,7 +389,7 @@ fun NodesScreen(
                                     shape = BellaShapes.medium,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("新建订阅")
+                                    Text(s.nodesActionAddSub)
                                 }
                             }
                         }
@@ -439,7 +437,7 @@ fun NodesScreen(
                                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                                         ) {
                                             Text(
-                                                text = "${sub.nodeCount} 节点",
+                                                text = "${sub.nodeCount} nodes",
                                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold
@@ -453,9 +451,9 @@ fun NodesScreen(
                                     val timeStr = if (sub.lastUpdate > 0) {
                                         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
                                         sdf.format(Date(sub.lastUpdate))
-                                    } else "未曾更新"
+                                    } else s.nodesNeverUpdated
                                     Text(
-                                        text = "上次更新: $timeStr",
+                                        text = "${s.nodesLastUpdate}: $timeStr",
                                         fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.outline
                                     )
@@ -490,7 +488,7 @@ fun NodesScreen(
                                                     color = MaterialTheme.colorScheme.onPrimary
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
-                                                Text("更新中&#8230;", fontSize = 12.sp)
+                                                Text(s.nodesTesting, fontSize = 12.sp)
                                             } else {
                                                 Icon(
                                                     imageVector = Icons.Rounded.Refresh,
@@ -498,7 +496,7 @@ fun NodesScreen(
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
-                                                Text("立即更新", fontSize = 12.sp)
+                                                Text(s.nodesUpdateNow, fontSize = 12.sp)
                                             }
                                         }
 
@@ -557,14 +555,14 @@ fun NodesScreen(
 
         AlertDialog(
             onDismissRequest = { showAddSubDialog = false },
-            title = { Text("添加订阅", fontWeight = FontWeight.Bold) },
+            title = { Text(s.dialogAddSubTitle, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     OutlinedTextField(
                         value = subName,
                         onValueChange = { subName = it },
-                        label = { Text("订阅名称") },
-                        placeholder = { Text("例如：极速节点订阅") },
+                        label = { Text(s.dialogSubName) },
+                        placeholder = { Text("My Subscription") },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -573,7 +571,7 @@ fun NodesScreen(
                     OutlinedTextField(
                         value = subUrl,
                         onValueChange = { subUrl = it },
-                        label = { Text("订阅链接 URL") },
+                        label = { Text(s.dialogSubUrl) },
                         placeholder = { Text("https://example.com/sub") },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth()
@@ -584,19 +582,19 @@ fun NodesScreen(
                 Button(
                     onClick = {
                         if (subUrl.isNotBlank()) {
-                            val name = subName.ifBlank { "订阅 ${System.currentTimeMillis() % 1000}" }
+                            val name = subName.ifBlank { "Sub ${System.currentTimeMillis() % 1000}" }
                             viewModel.addSubscription(name, subUrl.trim())
                             showAddSubDialog = false
                         }
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("导入并解析")
+                    Text(s.nodesActionImportLink)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddSubDialog = false }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -611,13 +609,13 @@ fun NodesScreen(
 
         AlertDialog(
             onDismissRequest = { editingSub = null },
-            title = { Text("编辑订阅配置", fontWeight = FontWeight.Bold) },
+            title = { Text(s.dialogEditSubTitle, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("订阅名称") },
+                        label = { Text(s.dialogSubName) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -626,7 +624,7 @@ fun NodesScreen(
                     OutlinedTextField(
                         value = url,
                         onValueChange = { url = it },
-                        label = { Text("订阅链接 URL") },
+                        label = { Text(s.dialogSubUrl) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -642,12 +640,12 @@ fun NodesScreen(
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("保存")
+                    Text(s.actionSave)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingSub = null }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -661,15 +659,15 @@ fun NodesScreen(
 
         AlertDialog(
             onDismissRequest = { deletingSub = null },
-            title = { Text("确认删除订阅", fontWeight = FontWeight.Bold) },
+            title = { Text(s.dialogConfirmDelete, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
-                    Text("确定要删除订阅 \"${currentSubDelete.name}\" 吗？")
+                    Text(s.dialogDeleteSubConfirm(currentSubDelete.name))
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = deleteNodesToo, onCheckedChange = { deleteNodesToo = it })
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("同时删除属于该订阅的所有节点", fontSize = 13.sp)
+                        Text(if (s.dialogConfirmDelete.contains("确认")) "同时删除属于该订阅的所有节点" else "Delete all nodes in this subscription", fontSize = 13.sp)
                     }
                 }
             },
@@ -682,12 +680,12 @@ fun NodesScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shape = BellaShapes.small
                 ) {
-                    Text("确认删除")
+                    Text(s.actionDelete)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deletingSub = null }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -701,7 +699,7 @@ fun NodesScreen(
 
         AlertDialog(
             onDismissRequest = { showImportUrlDialog = false },
-            title = { Text("导入代理分享链接", fontWeight = FontWeight.Bold) },
+            title = { Text(s.dialogImportTitle, fontWeight = FontWeight.Bold) },
             text = {
                 Column {
                     OutlinedTextField(
@@ -710,14 +708,15 @@ fun NodesScreen(
                             shareLink = it
                             isError = false
                         },
-                        label = { Text("分享链接 (vless://, vmess://, trojan://, ss://, hy2://, tuic://, wg://)") },
+                        label = { Text("Proxy URL") },
+                        placeholder = { Text("vless://, vmess://, trojan://, ss://, hy2://, tuic://, wg://") },
                         shape = BellaShapes.small,
                         isError = isError,
                         modifier = Modifier.fillMaxWidth()
                     )
                     if (isError) {
                         Text(
-                            text = "不支持的链接格式或格式损坏",
+                            text = s.dialogImportFailed,
                             color = MaterialTheme.colorScheme.error,
                             fontSize = 11.sp,
                             modifier = Modifier.padding(top = 4.dp)
@@ -737,12 +736,12 @@ fun NodesScreen(
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("导入")
+                    Text(s.nodesActionImportLink)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showImportUrlDialog = false }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -763,13 +762,13 @@ fun NodesScreen(
 
         AlertDialog(
             onDismissRequest = { editingNode = null },
-            title = { Text("编辑节点参数", fontWeight = FontWeight.Bold) },
+            title = { Text(s.dialogEditNodeTitle, fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.fillMaxWidth().verticalScroll(scrollState)) {
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("节点名称") },
+                        label = { Text(s.dialogNodeName) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -778,7 +777,7 @@ fun NodesScreen(
                     OutlinedTextField(
                         value = server,
                         onValueChange = { server = it },
-                        label = { Text("服务器地址") },
+                        label = { Text(s.dialogServerAddress) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -787,7 +786,7 @@ fun NodesScreen(
                     OutlinedTextField(
                         value = port,
                         onValueChange = { port = it },
-                        label = { Text("端口号") },
+                        label = { Text(s.dialogServerPort) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -808,7 +807,7 @@ fun NodesScreen(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            label = { Text("密码 / 密钥") },
+                            label = { Text("Password") },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -818,7 +817,7 @@ fun NodesScreen(
                     OutlinedTextField(
                         value = sni,
                         onValueChange = { sni = it },
-                        label = { Text("SNI (Server Name)") },
+                        label = { Text("SNI") },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -842,12 +841,12 @@ fun NodesScreen(
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("保存")
+                    Text(s.actionSave)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingNode = null }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -859,8 +858,8 @@ fun NodesScreen(
     if (currentDeletingNode != null) {
         AlertDialog(
             onDismissRequest = { deletingNode = null },
-            title = { Text("确认删除节点", fontWeight = FontWeight.Bold) },
-            text = { Text("确定要删除节点 \"${currentDeletingNode.name}\" 吗？") },
+            title = { Text(s.dialogConfirmDelete, fontWeight = FontWeight.Bold) },
+            text = { Text(s.dialogDeleteNodeConfirm(currentDeletingNode.name)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -870,12 +869,12 @@ fun NodesScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shape = BellaShapes.small
                 ) {
-                    Text("删除")
+                    Text(s.actionDelete)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deletingNode = null }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge

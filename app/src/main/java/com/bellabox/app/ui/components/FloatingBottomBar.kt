@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -30,19 +31,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.bellabox.app.R
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
 
-enum class NavigationTab(val labelRes: Int, val icon: ImageVector) {
-    HOME(R.string.nav_home, Icons.Rounded.Home),
-    NODES(R.string.nav_nodes, Icons.Rounded.List),
-    GROUPS(R.string.nav_groups, Icons.Rounded.Hub),
-    RULES(R.string.nav_rules, Icons.Rounded.Route),
-    TOOLS(R.string.nav_tools, Icons.Rounded.Build),
-    SETTINGS(R.string.nav_settings, Icons.Rounded.Settings)
+enum class NavigationTab(val icon: ImageVector) {
+    HOME(Icons.Rounded.Home),
+    NODES(Icons.Rounded.List),
+    GROUPS(Icons.Rounded.Hub),
+    RULES(Icons.Rounded.Route),
+    TOOLS(Icons.Rounded.Build),
+    SETTINGS(Icons.Rounded.Settings)
 }
 
 @Composable
@@ -51,10 +51,13 @@ fun FloatingBottomBar(
     onTabSelected: (NavigationTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val s = LocalAppStrings.current
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Surface(
@@ -66,7 +69,7 @@ fun FloatingBottomBar(
                 )
                 .clip(BellaShapes.extraLarge)
                 .height(68.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
             tonalElevation = 6.dp
         ) {
             Row(
@@ -84,7 +87,14 @@ fun FloatingBottomBar(
                         label = "tab_tint"
                     )
 
-                    val labelText = stringResource(tab.labelRes)
+                    val labelText = when (tab) {
+                        NavigationTab.HOME -> s.navHome
+                        NavigationTab.NODES -> s.navNodes
+                        NavigationTab.GROUPS -> s.navGroups
+                        NavigationTab.RULES -> s.navRules
+                        NavigationTab.TOOLS -> s.navTools
+                        NavigationTab.SETTINGS -> s.navSettings
+                    }
 
                     Column(
                         modifier = Modifier
@@ -93,7 +103,7 @@ fun FloatingBottomBar(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) { onTabSelected(tab) }
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {

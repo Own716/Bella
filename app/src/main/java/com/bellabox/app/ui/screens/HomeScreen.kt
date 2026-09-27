@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Speed
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bellabox.app.ui.components.PulseConnectButton
 import com.bellabox.app.ui.components.SpeedChart
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
 import com.bellabox.app.ui.theme.DownloadSpeedColor
 import com.bellabox.app.ui.theme.StatusFailed
@@ -54,6 +56,7 @@ fun HomeScreen(
     onNavigateToNodes: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val s = LocalAppStrings.current
     val context = LocalContext.current
     val connectionState by viewModel.connectionState.collectAsState()
     val lastError by viewModel.lastError.collectAsState()
@@ -67,15 +70,16 @@ fun HomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Top Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 12.dp),
+                .padding(top = 4.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -112,7 +116,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "TESTING CORE",
+                        text = s.homeTestingCore,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -173,6 +177,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(BellaShapes.large)
+                .clickable { onNavigateToNodes() }
         ) {
             Column(
                 modifier = Modifier.padding(18.dp)
@@ -191,7 +196,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "ACTIVE OUTBOUND",
+                            text = s.homeActiveOutbound,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -199,7 +204,7 @@ fun HomeScreen(
                     }
 
                     Text(
-                        text = if (activeNode != null) "Change" else "Select",
+                        text = if (activeNode != null) s.homeChange else s.homeSelect,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
@@ -223,7 +228,7 @@ fun HomeScreen(
                     )
                 } else {
                     Text(
-                        text = "No proxy node selected",
+                        text = s.homeNoProxyNode,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -257,7 +262,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "REAL-TIME TRAFFIC FLOW",
+                            text = s.homeRealtimeTraffic,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.secondary
@@ -281,7 +286,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Download",
+                                text = s.homeDownload,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -304,7 +309,7 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Upload",
+                                text = s.homeUpload,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -345,7 +350,7 @@ fun HomeScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Total Down",
+                        text = s.homeTotalDown,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -365,7 +370,7 @@ fun HomeScreen(
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Total Up",
+                        text = s.homeTotalUp,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -378,6 +383,6 @@ fun HomeScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(80.dp)) // Padding for floating bottom bar
+        Spacer(modifier = Modifier.height(88.dp)) // Padding for floating bottom bar
     }
 }

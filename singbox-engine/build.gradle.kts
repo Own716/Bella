@@ -10,7 +10,8 @@ android {
     defaultConfig {
         minSdk = 26
         ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86_64"))
+            abiFilters.clear()
+            abiFilters.add("arm64-v8a")
         }
     }
 

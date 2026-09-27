@@ -41,7 +41,12 @@ abstract class BellaDatabase : RoomDatabase() {
                     context.applicationContext,
                     BellaDatabase::class.java,
                     "bellabox.db"
-                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigrationOnDowngrade()
+                    .build()
+                    .also { instance = it }
             }
         }
     }

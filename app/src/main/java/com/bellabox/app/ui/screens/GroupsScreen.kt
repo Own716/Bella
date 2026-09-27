@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,7 +20,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Hub
@@ -40,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -56,16 +53,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
 import com.bellabox.core.model.StrategyGroup
 import com.bellabox.core.model.StrategyType
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupsScreen(
     viewModel: GroupsViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
+    val s = LocalAppStrings.current
+
     val groups by viewModel.groups.collectAsState()
     val availableNodes by viewModel.availableNodes.collectAsState()
 
@@ -73,7 +73,11 @@ fun GroupsScreen(
     var editingGroup by remember { mutableStateOf<StrategyGroup?>(null) }
     var deletingGroup by remember { mutableStateOf<StrategyGroup?>(null) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,24 +87,24 @@ fun GroupsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 12.dp),
+                    .padding(top = 12.dp, bottom = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Hub,
-                    contentDescription = "Groups",
+                    contentDescription = s.groupsTitle,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
                     Text(
-                        text = "策略组管理",
+                        text = s.groupsTitle,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = "自适应故障转移、多节点负载与延迟择优",
+                        text = s.groupsSubtitle,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -131,13 +135,13 @@ fun GroupsScreen(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "暂无策略组",
+                                text = s.groupsEmptyTitle,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "点击右下角按钮创建自定义分流策略组",
+                                text = s.groupsEmptyDesc,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -179,6 +183,14 @@ fun GroupsScreen(
                                     }
 
                                     // Type Badge
+                                    val typeLabel = when (group.type) {
+                                        StrategyType.MANUAL -> s.groupsStrategyManual
+                                        StrategyType.URLTEST -> s.groupsStrategyUrlTest
+                                        StrategyType.FALLBACK -> s.groupsStrategyFallback
+                                        StrategyType.CONSISTENT_HASH -> s.groupsStrategyConsistentHash
+                                        StrategyType.ROUND_ROBIN -> s.groupsStrategyRoundRobin
+                                    }
+
                                     Box(
                                         modifier = Modifier
                                             .clip(BellaShapes.small)
@@ -186,7 +198,7 @@ fun GroupsScreen(
                                             .padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
                                         Text(
-                                            text = group.type.label,
+                                            text = typeLabel,
                                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold
@@ -201,7 +213,7 @@ fun GroupsScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Rounded.Edit,
-                                            contentDescription = "Edit",
+                                            contentDescription = s.actionEdit,
                                             tint = MaterialTheme.colorScheme.outline,
                                             modifier = Modifier.size(18.dp)
                                         )
@@ -213,7 +225,7 @@ fun GroupsScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Rounded.DeleteOutline,
-                                            contentDescription = "Delete",
+                                            contentDescription = s.actionDelete,
                                             tint = MaterialTheme.colorScheme.error,
                                             modifier = Modifier.size(18.dp)
                                         )
@@ -222,17 +234,9 @@ fun GroupsScreen(
 
                                 Spacer(modifier = Modifier.height(10.dp))
 
-                                Text(
-                                    text = group.type.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
                                 val memberCount = if (group.nodeIds.isEmpty()) availableNodes.size else group.nodeIds.size
                                 Text(
-                                    text = "包含节点: $memberCount 个" + if (group.nodeIds.isEmpty()) " (全部可用节点)" else "",
+                                    text = "${s.groupsIncludedNodes}: $memberCount" + if (group.nodeIds.isEmpty()) " (${if (s.groupsTitle.contains("策略")) "全部可用节点" else "All available nodes"})" else "",
                                     fontSize = 12.sp,
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.SemiBold
@@ -241,7 +245,7 @@ fun GroupsScreen(
                                 if (group.type == StrategyType.URLTEST) {
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "测速目标: ${group.urlTestUrl} (${group.urlTestIntervalMinutes}分钟/次)",
+                                        text = "Probe: ${group.urlTestUrl} (${group.urlTestIntervalMinutes}m)",
                                         fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.outline
                                     )
@@ -263,7 +267,7 @@ fun GroupsScreen(
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 90.dp, end = 20.dp)
         ) {
-            Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add Group")
+            Icon(imageVector = Icons.Rounded.Add, contentDescription = s.groupsNewGroup)
         }
     }
 
@@ -289,7 +293,7 @@ fun GroupsScreen(
             },
             title = {
                 Text(
-                    text = if (isEditing) "编辑策略组" else "新建策略组",
+                    text = if (isEditing) s.groupsEditGroup else s.groupsNewGroup,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -307,8 +311,7 @@ fun GroupsScreen(
                                 tag = it.lowercase().replace(" ", "-")
                             }
                         },
-                        label = { Text("策略组名称") },
-                        placeholder = { Text("例如：自动测速组") },
+                        label = { Text(s.groupsGroupName) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -319,8 +322,7 @@ fun GroupsScreen(
                     OutlinedTextField(
                         value = tag,
                         onValueChange = { tag = it },
-                        label = { Text("策略组标识 (Tag)") },
-                        placeholder = { Text("例如：auto-fastest") },
+                        label = { Text("Tag") },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -332,11 +334,19 @@ fun GroupsScreen(
                         expanded = typeDropdownExpanded,
                         onExpandedChange = { typeDropdownExpanded = it }
                     ) {
+                        val currentTypeLabel = when (type) {
+                            StrategyType.MANUAL -> s.groupsStrategyManual
+                            StrategyType.URLTEST -> s.groupsStrategyUrlTest
+                            StrategyType.FALLBACK -> s.groupsStrategyFallback
+                            StrategyType.CONSISTENT_HASH -> s.groupsStrategyConsistentHash
+                            StrategyType.ROUND_ROBIN -> s.groupsStrategyRoundRobin
+                        }
+
                         OutlinedTextField(
-                            value = type.label,
+                            value = currentTypeLabel,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("策略类型") },
+                            label = { Text(s.groupsStrategyType) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeDropdownExpanded) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -346,12 +356,16 @@ fun GroupsScreen(
                             onDismissRequest = { typeDropdownExpanded = false }
                         ) {
                             StrategyType.entries.forEach { st ->
+                                val stLabel = when (st) {
+                                    StrategyType.MANUAL -> s.groupsStrategyManual
+                                    StrategyType.URLTEST -> s.groupsStrategyUrlTest
+                                    StrategyType.FALLBACK -> s.groupsStrategyFallback
+                                    StrategyType.CONSISTENT_HASH -> s.groupsStrategyConsistentHash
+                                    StrategyType.ROUND_ROBIN -> s.groupsStrategyRoundRobin
+                                }
                                 DropdownMenuItem(
                                     text = {
-                                        Column {
-                                            Text(st.label, fontWeight = FontWeight.Bold)
-                                            Text(st.description, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
+                                        Text(stLabel, fontWeight = FontWeight.Bold)
                                     },
                                     onClick = {
                                         type = st
@@ -367,7 +381,7 @@ fun GroupsScreen(
                         OutlinedTextField(
                             value = url,
                             onValueChange = { url = it },
-                            label = { Text("测速 URL") },
+                            label = { Text("Probe URL") },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -378,7 +392,7 @@ fun GroupsScreen(
                             OutlinedTextField(
                                 value = interval,
                                 onValueChange = { interval = it },
-                                label = { Text("间隔(分)") },
+                                label = { Text("Interval (min)") },
                                 shape = BellaShapes.small,
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
@@ -386,7 +400,7 @@ fun GroupsScreen(
                             OutlinedTextField(
                                 value = tolerance,
                                 onValueChange = { tolerance = it },
-                                label = { Text("容差(ms)") },
+                                label = { Text("Tolerance (ms)") },
                                 shape = BellaShapes.small,
                                 modifier = Modifier.weight(1f),
                                 singleLine = true
@@ -396,7 +410,7 @@ fun GroupsScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "选择包含的节点 (留空则默认包含全部节点):",
+                        text = "${s.groupsIncludedNodes}:",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
@@ -462,7 +476,7 @@ fun GroupsScreen(
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("保存")
+                    Text(s.actionSave)
                 }
             },
             dismissButton = {
@@ -470,7 +484,7 @@ fun GroupsScreen(
                     showAddDialog = false
                     editingGroup = null
                 }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -482,8 +496,8 @@ fun GroupsScreen(
     if (toDelete != null) {
         AlertDialog(
             onDismissRequest = { deletingGroup = null },
-            title = { Text("确认删除策略组", fontWeight = FontWeight.Bold) },
-            text = { Text("确定要删除策略组 \"${toDelete.name}\" 吗？该操作不会删除底层节点。") },
+            title = { Text(s.groupsDeleteGroup, fontWeight = FontWeight.Bold) },
+            text = { Text(s.groupsDeleteConfirm(toDelete.name)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -495,12 +509,12 @@ fun GroupsScreen(
                     ),
                     shape = BellaShapes.small
                 ) {
-                    Text("删除")
+                    Text(s.actionDelete)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deletingGroup = null }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge

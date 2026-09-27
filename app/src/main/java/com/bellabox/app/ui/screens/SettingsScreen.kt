@@ -9,20 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ColorLens
-import androidx.compose.material.icons.rounded.Dns
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.NetworkPing
-import androidx.compose.material.icons.rounded.Power
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.rounded.Speed
-import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.VpnLock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -46,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +49,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
+    val s = LocalAppStrings.current
+
     val themeMode by viewModel.themeMode.collectAsState()
     val language by viewModel.language.collectAsState()
     val dynamicColor by viewModel.dynamicColor.collectAsState()
@@ -82,6 +78,7 @@ fun SettingsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -94,19 +91,19 @@ fun SettingsScreen(
         ) {
             Icon(
                 imageVector = Icons.Rounded.Settings,
-                contentDescription = "Settings",
+                contentDescription = s.settingsTitle,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
-                    text = "系统与个性化",
+                    text = s.settingsTitle,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
-                    text = "Sing-box 1.15 内核参数、网络策略与界面偏好",
+                    text = s.settingsSubtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -114,7 +111,7 @@ fun SettingsScreen(
         }
 
         // Section: Appearance
-        SectionTitle(title = "界面与外观")
+        SectionTitle(title = s.settingsAppearance)
         Card(
             shape = BellaShapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -128,15 +125,15 @@ fun SettingsScreen(
                     onExpandedChange = { themeExpanded = it }
                 ) {
                     val themeLabel = when (themeMode) {
-                        "light" -> "浅色模式"
-                        "dark" -> "深色模式"
-                        else -> "跟随系统"
+                        "light" -> s.settingsThemeLight
+                        "dark" -> s.settingsThemeDark
+                        else -> s.settingsThemeSystem
                     }
                     OutlinedTextField(
                         value = themeLabel,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("主题外观") },
+                        label = { Text(s.settingsThemeMode) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = themeExpanded) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -146,21 +143,21 @@ fun SettingsScreen(
                         onDismissRequest = { themeExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("跟随系统") },
+                            text = { Text(s.settingsThemeSystem) },
                             onClick = {
                                 viewModel.setThemeMode("system")
                                 themeExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("浅色模式") },
+                            text = { Text(s.settingsThemeLight) },
                             onClick = {
                                 viewModel.setThemeMode("light")
                                 themeExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("深色模式") },
+                            text = { Text(s.settingsThemeDark) },
                             onClick = {
                                 viewModel.setThemeMode("dark")
                                 themeExpanded = false
@@ -176,17 +173,12 @@ fun SettingsScreen(
                     expanded = langExpanded,
                     onExpandedChange = { langExpanded = it }
                 ) {
-                    val langLabel = when (language) {
-                        "en" -> "English"
-                        "ja" -> "日本語"
-                        "zh-TW" -> "繁體中文"
-                        else -> "简体中文 (默认)"
-                    }
+                    val langLabel = if (language == "en") s.settingsLangEn else s.settingsLangZh
                     OutlinedTextField(
                         value = langLabel,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("界面语言") },
+                        label = { Text(s.settingsLanguage) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = langExpanded) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -196,30 +188,16 @@ fun SettingsScreen(
                         onDismissRequest = { langExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("简体中文 (默认)") },
+                            text = { Text(s.settingsLangZh) },
                             onClick = {
                                 viewModel.setLanguage("zh")
                                 langExpanded = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("English") },
+                            text = { Text(s.settingsLangEn) },
                             onClick = {
                                 viewModel.setLanguage("en")
-                                langExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("繁體中文") },
-                            onClick = {
-                                viewModel.setLanguage("zh-TW")
-                                langExpanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("日本語") },
-                            onClick = {
-                                viewModel.setLanguage("ja")
                                 langExpanded = false
                             }
                         )
@@ -229,8 +207,8 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 SettingSwitchRow(
-                    title = "动态主题色 (Material You)",
-                    subtitle = "提取系统壁纸主题色，自适应全局控件",
+                    title = s.settingsDynamicColor,
+                    subtitle = s.settingsDynamicColorDesc,
                     checked = dynamicColor,
                     onCheckedChange = { viewModel.setDynamicColor(it) }
                 )
@@ -240,7 +218,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Section: Network & Connection
-        SectionTitle(title = "连接与自动化")
+        SectionTitle(title = s.settingsConnection)
         Card(
             shape = BellaShapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -249,8 +227,8 @@ fun SettingsScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 SettingSwitchRow(
-                    title = "开机自启连接",
-                    subtitle = "设备启动完毕后自动拉起安全隧道",
+                    title = s.settingsAutoConnectBoot,
+                    subtitle = s.settingsAutoConnectBootDesc,
                     checked = autoConnectOnBoot,
                     onCheckedChange = { viewModel.setAutoConnectOnBoot(it) }
                 )
@@ -258,8 +236,8 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 SettingSwitchRow(
-                    title = "网络切换自动重连",
-                    subtitle = "在 Wi-Fi 与移动网络漫游时自动重连",
+                    title = s.settingsAutoReconnectNet,
+                    subtitle = s.settingsAutoReconnectNetDesc,
                     checked = autoReconnectNet,
                     onCheckedChange = { viewModel.setAutoReconnectNetworkChange(it) }
                 )
@@ -269,7 +247,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Section: Sing-box TUN
-        SectionTitle(title = "TUN 虚拟网卡")
+        SectionTitle(title = s.settingsTunStack)
         Card(
             shape = BellaShapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -283,9 +261,9 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("TCP/IP 网络协议栈", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text("TCP/IP Stack", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                         Text(
-                            "Sing-box 1.15 原生 TCP/IP 栈 (无系统栈开销)",
+                            "Sing-box 1.15 High-Performance Stack",
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -297,7 +275,8 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = tunMtu.toString(),
                     onValueChange = { it.toIntOrNull()?.let { v -> viewModel.setTunMtu(v) } },
-                    label = { Text("TUN MTU 大小") },
+                    label = { Text(s.settingsTunMtu) },
+                    supportingText = { Text(s.settingsTunMtuDesc) },
                     shape = BellaShapes.small,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -306,8 +285,8 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 SettingSwitchRow(
-                    title = "严格路由 (Strict Route)",
-                    subtitle = "拦截并丢弃非目标网卡的直连流量以防泄露",
+                    title = s.settingsTunStrictRoute,
+                    subtitle = s.settingsTunStrictRouteDesc,
                     checked = tunStrictRoute,
                     onCheckedChange = { viewModel.setTunStrictRoute(it) }
                 )
@@ -315,8 +294,8 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 SettingSwitchRow(
-                    title = "绕过局域网 (Bypass LAN)",
-                    subtitle = "私有 IP (192.168.x / 10.x / 172.16.x) 保持直连",
+                    title = s.settingsBypassLan,
+                    subtitle = s.settingsBypassLanDesc,
                     checked = bypassLan,
                     onCheckedChange = { viewModel.setBypassLan(it) }
                 )
@@ -326,7 +305,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Section: DNS
-        SectionTitle(title = "DNS 与域名解析")
+        SectionTitle(title = s.settingsDns)
         Card(
             shape = BellaShapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -335,8 +314,8 @@ fun SettingsScreen(
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 SettingSwitchRow(
-                    title = "FakeIP 模式",
-                    subtitle = "分配保留虚拟 IP，极大减少远端 DNS 解析往返耗时",
+                    title = s.settingsFakeIp,
+                    subtitle = s.settingsFakeIpDesc,
                     checked = fakeIpEnabled,
                     onCheckedChange = { viewModel.setFakeIpEnabled(it) }
                 )
@@ -346,7 +325,7 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = dnsDirect,
                     onValueChange = { viewModel.setDnsDirect(it) },
-                    label = { Text("国内直连 DNS") },
+                    label = { Text(s.settingsDnsDirect) },
                     shape = BellaShapes.small,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -357,7 +336,7 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = dnsRemote,
                     onValueChange = { viewModel.setDnsRemote(it) },
-                    label = { Text("远端代理 DNS") },
+                    label = { Text(s.settingsDnsRemote) },
                     shape = BellaShapes.small,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -368,7 +347,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Section: Speed Test Settings
-        SectionTitle(title = "测速与并发评估")
+        SectionTitle(title = s.settingsSpeedTest)
         Card(
             shape = BellaShapes.large,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -379,7 +358,7 @@ fun SettingsScreen(
                 OutlinedTextField(
                     value = speedTestUrl,
                     onValueChange = { viewModel.setSpeedTestUrl(it) },
-                    label = { Text("测速目标 URL") },
+                    label = { Text(s.settingsSpeedTestUrl) },
                     shape = BellaShapes.small,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -391,7 +370,7 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = speedTestTimeout.toString(),
                         onValueChange = { it.toIntOrNull()?.let { v -> viewModel.setSpeedTestTimeoutSec(v) } },
-                        label = { Text("超时时间(秒)") },
+                        label = { Text(s.settingsSpeedTestTimeout) },
                         shape = BellaShapes.small,
                         modifier = Modifier.weight(1f),
                         singleLine = true
@@ -399,7 +378,7 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = speedTestConcurrency.toString(),
                         onValueChange = { it.toIntOrNull()?.let { v -> viewModel.setSpeedTestConcurrency(v) } },
-                        label = { Text("最大并发数") },
+                        label = { Text(s.settingsSpeedTestConcurrency) },
                         shape = BellaShapes.small,
                         modifier = Modifier.weight(1f),
                         singleLine = true
@@ -426,14 +405,14 @@ fun SettingsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Info,
-                    contentDescription = "About",
+                    contentDescription = s.settingsAboutKernel,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text("关于 BellaBox", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("查看版本、内核状态、实时运行日志与开源许可", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(s.settingsAboutKernel, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(s.settingsAboutKernelDesc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

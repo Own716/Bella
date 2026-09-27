@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,20 +36,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
 import com.bellabox.app.ui.theme.LatencyLowColor
 import com.bellabox.core.network.IpInfoProvider
 import com.bellabox.core.network.PublicIpInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 
 @Composable
 fun ToolsScreen(modifier: Modifier = Modifier) {
+    val s = LocalAppStrings.current
     val coroutineScope = rememberCoroutineScope()
     val ipInfoProvider = remember { IpInfoProvider() }
 
@@ -72,6 +73,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -84,19 +86,19 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.Rounded.Build,
-                contentDescription = "Tools",
+                contentDescription = s.toolsTitle,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
-                    text = "Network Diagnostics",
+                    text = s.toolsTitle,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
-                    text = "Real TCP Ping, DNS Query, and Public IP inspection",
+                    text = s.toolsSubtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -119,7 +121,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(imageVector = Icons.Rounded.Public, contentDescription = "IP", tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Public Outbound IP", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(s.toolsPublicIpTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
 
                     Button(
@@ -137,7 +139,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                         if (isCheckingIp) {
                             CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                         } else {
-                            Text("Query IP")
+                            Text(s.toolsCheckIp)
                         }
                     }
                 }
@@ -152,17 +154,17 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Location: ${publicIpInfo!!.city}, ${publicIpInfo!!.country}",
+                        text = "${s.toolsLocation}: ${publicIpInfo!!.city}, ${publicIpInfo!!.country}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = "ISP / ASN: ${publicIpInfo!!.isp} (${publicIpInfo!!.asn})",
+                        text = "${s.toolsIsp}: ${publicIpInfo!!.isp} (${publicIpInfo!!.asn})",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Text(
-                        text = "Click 'Query IP' to resolve current outbound route information.",
+                        text = s.toolsPublicIpDesc,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -183,7 +185,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Rounded.NetworkCheck, contentDescription = "TCP Ping", tint = MaterialTheme.colorScheme.secondary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("TCP Handshake Ping", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(s.toolsTcpPingTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -191,7 +193,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                     OutlinedTextField(
                         value = pingHost,
                         onValueChange = { pingHost = it },
-                        label = { Text("Host / IP") },
+                        label = { Text(s.toolsHost) },
                         shape = BellaShapes.small,
                         modifier = Modifier.weight(2f),
                         singleLine = true
@@ -199,7 +201,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                     OutlinedTextField(
                         value = pingPort,
                         onValueChange = { pingPort = it },
-                        label = { Text("Port") },
+                        label = { Text(s.toolsPort) },
                         shape = BellaShapes.small,
                         modifier = Modifier.weight(1f),
                         singleLine = true
@@ -218,9 +220,9 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                                 val p = pingPort.toIntOrNull() ?: 443
                                 socket.connect(InetSocketAddress(pingHost, p), 3000)
                                 val duration = (System.nanoTime() - start) / 1_000_000
-                                pingResult = "Connected to $pingHost:$p in $duration ms"
+                                pingResult = s.toolsPingSuccess(duration)
                             } catch (e: Exception) {
-                                pingResult = "Failed: ${e.message}"
+                                pingResult = "${s.toolsPingFailed}: ${e.message}"
                             } finally {
                                 try { socket.close() } catch (ignored: Exception) {}
                                 isPinging = false
@@ -234,7 +236,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                     if (isPinging) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Start TCP Ping")
+                        Text(s.toolsStartPing)
                     }
                 }
 
@@ -244,7 +246,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                         text = pingResult!!,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (pingResult!!.startsWith("Connected")) LatencyLowColor else MaterialTheme.colorScheme.error
+                        color = if (pingResult!!.contains("ms")) LatencyLowColor else MaterialTheme.colorScheme.error
                     )
                 }
             }
@@ -263,14 +265,14 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Rounded.Dns, contentDescription = "DNS", tint = MaterialTheme.colorScheme.tertiary)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("DNS Resolution Diagnosis", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(s.toolsDnsTitle, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
                 OutlinedTextField(
                     value = dnsHost,
                     onValueChange = { dnsHost = it },
-                    label = { Text("Domain Name") },
+                    label = { Text(s.toolsQueryDomain) },
                     shape = BellaShapes.small,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -286,7 +288,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                                 val ips = InetAddress.getAllByName(dnsHost)
                                 dnsResult = ips.joinToString("\n") { "${it.hostAddress} (${if (it.address.size == 4) "IPv4" else "IPv6"})" }
                             } catch (e: Exception) {
-                                dnsResult = "DNS Resolution Failed: ${e.message}"
+                                dnsResult = "${s.toolsQueryFailed}: ${e.message}"
                             } finally {
                                 isResolvingDns = false
                             }
@@ -299,7 +301,7 @@ fun ToolsScreen(modifier: Modifier = Modifier) {
                     if (isResolvingDns) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Query DNS")
+                        Text(s.toolsStartLookup)
                     }
                 }
 

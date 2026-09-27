@@ -129,6 +129,7 @@ fun PulseConnectButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            val s = com.bellabox.app.ui.i18n.LocalAppStrings.current
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -141,13 +142,13 @@ fun PulseConnectButton(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = when (state) {
-                        ConnectionState.CONNECTED -> "CONNECTED"
-                        ConnectionState.CONNECTING -> "CONNECTING"
-                        ConnectionState.RECONNECTING -> "RECONNECT"
-                        ConnectionState.STARTING -> "STARTING"
-                        ConnectionState.STOPPING -> "STOPPING"
-                        ConnectionState.FAILED -> "RETRY"
-                        else -> "CONNECT"
+                        ConnectionState.CONNECTED -> s.btnConnected
+                        ConnectionState.CONNECTING -> s.btnConnecting
+                        ConnectionState.RECONNECTING -> s.btnReconnect
+                        ConnectionState.STARTING -> s.btnStarting
+                        ConnectionState.STOPPING -> s.btnStopping
+                        ConnectionState.FAILED -> s.btnRetry
+                        else -> s.btnConnect
                     },
                     color = Color.White,
                     fontSize = 12.sp,

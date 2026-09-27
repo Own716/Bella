@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -50,11 +51,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bellabox.app.ui.i18n.LocalAppStrings
 import com.bellabox.app.ui.theme.BellaShapes
 import com.bellabox.app.ui.theme.StatusConnected
 import com.bellabox.app.ui.theme.StatusFailed
@@ -68,6 +69,8 @@ fun RulesScreen(
     viewModel: RulesViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
+    val s = LocalAppStrings.current
+
     val rules by viewModel.rules.collectAsState()
 
     var showAddDialog by remember { mutableStateOf(false) }
@@ -75,7 +78,11 @@ fun RulesScreen(
     var deletingRule by remember { mutableStateOf<RouteRule?>(null) }
     var showResetDialog by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,26 +92,26 @@ fun RulesScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 12.dp),
+                    .padding(top = 12.dp, bottom = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Rounded.Route,
-                        contentDescription = "Rules",
+                        contentDescription = s.rulesTitle,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
-                            text = "路由分流规则",
+                            text = s.rulesTitle,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.ExtraBold
                         )
                         Text(
-                            text = "自上而下逐条匹配，首条命中立即执行",
+                            text = s.rulesSubtitle,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -115,7 +122,7 @@ fun RulesScreen(
                 IconButton(onClick = { showResetDialog = true }) {
                     Icon(
                         imageVector = Icons.Rounded.Refresh,
-                        contentDescription = "Reset Rules",
+                        contentDescription = s.rulesResetDefaults,
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -136,7 +143,7 @@ fun RulesScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "暂无路由规则",
+                                text = s.rulesEmptyTitle,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -145,7 +152,7 @@ fun RulesScreen(
                                 onClick = { viewModel.resetToDefaultRules() },
                                 shape = BellaShapes.small
                             ) {
-                                Text("加载官方默认分流规则")
+                                Text(s.rulesResetDefaults)
                             }
                         }
                     }
@@ -217,9 +224,9 @@ fun RulesScreen(
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         val (actionColor, actionLabel) = when (rule.action) {
-                                            RuleActionType.DIRECT -> StatusConnected to "直连 (DIRECT)"
-                                            RuleActionType.PROXY -> MaterialTheme.colorScheme.primary to "代理 (PROXY)"
-                                            RuleActionType.BLOCK -> StatusFailed to "阻止 (BLOCK)"
+                                            RuleActionType.DIRECT -> StatusConnected to s.rulesActionDirect
+                                            RuleActionType.PROXY -> MaterialTheme.colorScheme.primary to s.rulesActionProxy
+                                            RuleActionType.BLOCK -> StatusFailed to s.rulesActionBlock
                                         }
                                         Box(
                                             modifier = Modifier
@@ -254,7 +261,7 @@ fun RulesScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Rounded.Edit,
-                                        contentDescription = "Edit",
+                                        contentDescription = s.actionEdit,
                                         tint = MaterialTheme.colorScheme.outline,
                                         modifier = Modifier.size(18.dp)
                                     )
@@ -267,7 +274,7 @@ fun RulesScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Rounded.DeleteOutline,
-                                        contentDescription = "Delete",
+                                        contentDescription = s.actionDelete,
                                         tint = MaterialTheme.colorScheme.error,
                                         modifier = Modifier.size(18.dp)
                                     )
@@ -295,7 +302,7 @@ fun RulesScreen(
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 90.dp, end = 20.dp)
         ) {
-            Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add Rule")
+            Icon(imageVector = Icons.Rounded.Add, contentDescription = s.rulesNewRule)
         }
     }
 
@@ -320,7 +327,7 @@ fun RulesScreen(
             },
             title = {
                 Text(
-                    text = if (isEditing) "编辑分流规则" else "新建分流规则",
+                    text = if (isEditing) s.rulesEditRule else s.rulesNewRule,
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -333,8 +340,8 @@ fun RulesScreen(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("规则名称") },
-                        placeholder = { Text("例如：国内直连") },
+                        label = { Text(s.rulesDescription) },
+                        placeholder = { Text("e.g. Direct China") },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
@@ -350,7 +357,7 @@ fun RulesScreen(
                             value = ruleType.name,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("匹配类型") },
+                            label = { Text(s.rulesRuleType) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = ruleTypeDropdownExpanded) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -376,8 +383,8 @@ fun RulesScreen(
                     OutlinedTextField(
                         value = valuesText,
                         onValueChange = { valuesText = it },
-                        label = { Text("匹配内容 (逗号分隔)") },
-                        placeholder = { Text("例如：cn 或 google.com, youtube.com") },
+                        label = { Text(s.rulesPayload) },
+                        placeholder = { Text(s.rulesPayloadHint) },
                         shape = BellaShapes.small,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -388,11 +395,17 @@ fun RulesScreen(
                         expanded = actionDropdownExpanded,
                         onExpandedChange = { actionDropdownExpanded = it }
                     ) {
+                        val currentActionLabel = when (action) {
+                            RuleActionType.DIRECT -> s.rulesActionDirect
+                            RuleActionType.PROXY -> s.rulesActionProxy
+                            RuleActionType.BLOCK -> s.rulesActionBlock
+                        }
+
                         OutlinedTextField(
-                            value = action.name,
+                            value = currentActionLabel,
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("执行动作") },
+                            label = { Text(s.rulesAction) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = actionDropdownExpanded) },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth().menuAnchor()
@@ -402,8 +415,13 @@ fun RulesScreen(
                             onDismissRequest = { actionDropdownExpanded = false }
                         ) {
                             RuleActionType.entries.forEach { at ->
+                                val atLabel = when (at) {
+                                    RuleActionType.DIRECT -> s.rulesActionDirect
+                                    RuleActionType.PROXY -> s.rulesActionProxy
+                                    RuleActionType.BLOCK -> s.rulesActionBlock
+                                }
                                 DropdownMenuItem(
-                                    text = { Text(at.name) },
+                                    text = { Text(atLabel) },
                                     onClick = {
                                         action = at
                                         actionDropdownExpanded = false
@@ -418,7 +436,7 @@ fun RulesScreen(
                         OutlinedTextField(
                             value = outboundTag,
                             onValueChange = { outboundTag = it },
-                            label = { Text("目标出站标识 (可选，默认proxy)") },
+                            label = { Text("Outbound Tag (optional, default proxy)") },
                             shape = BellaShapes.small,
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
@@ -452,7 +470,7 @@ fun RulesScreen(
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("保存")
+                    Text(s.actionSave)
                 }
             },
             dismissButton = {
@@ -460,7 +478,7 @@ fun RulesScreen(
                     showAddDialog = false
                     editingRule = null
                 }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -472,8 +490,8 @@ fun RulesScreen(
     if (toDelete != null) {
         AlertDialog(
             onDismissRequest = { deletingRule = null },
-            title = { Text("确认删除规则", fontWeight = FontWeight.Bold) },
-            text = { Text("确定要删除规则 \"${toDelete.name}\" 吗？") },
+            title = { Text(s.rulesDeleteRule, fontWeight = FontWeight.Bold) },
+            text = { Text(s.rulesDeleteConfirm(toDelete.name)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -483,12 +501,12 @@ fun RulesScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shape = BellaShapes.small
                 ) {
-                    Text("删除")
+                    Text(s.actionDelete)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deletingRule = null }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge
@@ -499,8 +517,8 @@ fun RulesScreen(
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("恢复默认规则", fontWeight = FontWeight.Bold) },
-            text = { Text("此操作将清空当前自定义路由，并重新初始化系统官方推荐的分流规则（DNS劫持、局域网直连、国内IP与域名直连、广告拦截等）。") },
+            title = { Text(s.rulesResetConfirmTitle, fontWeight = FontWeight.Bold) },
+            text = { Text(s.rulesResetConfirmDesc) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -509,12 +527,12 @@ fun RulesScreen(
                     },
                     shape = BellaShapes.small
                 ) {
-                    Text("确认重置")
+                    Text(s.actionConfirm)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text("取消")
+                    Text(s.actionCancel)
                 }
             },
             shape = BellaShapes.extraLarge

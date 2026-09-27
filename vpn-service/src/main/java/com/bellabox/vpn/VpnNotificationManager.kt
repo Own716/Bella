@@ -54,19 +54,24 @@ class VpnNotificationManager(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
         )
 
+        val isZh = context.getSharedPreferences("bellabox_settings", Context.MODE_PRIVATE)
+            .getString("app_language", "zh") != "en"
+
         val title = when (state) {
-            ConnectionState.CONNECTED -> "BellaBox: Connected"
-            ConnectionState.CONNECTING -> "BellaBox: Connecting&#8230;"
-            ConnectionState.RECONNECTING -> "BellaBox: Reconnecting&#8230;"
-            ConnectionState.STARTING -> "BellaBox: Initializing&#8230;"
-            else -> "BellaBox: Proxy Tunnel"
+            ConnectionState.CONNECTED -> if (isZh) "BellaBox: 已安全连接" else "BellaBox: Connected"
+            ConnectionState.CONNECTING -> if (isZh) "BellaBox: 正在建立隧道…" else "BellaBox: Connecting…"
+            ConnectionState.RECONNECTING -> if (isZh) "BellaBox: 网络波动重连中…" else "BellaBox: Reconnecting…"
+            ConnectionState.STARTING -> if (isZh) "BellaBox: 正在初始化内核…" else "BellaBox: Initializing…"
+            else -> if (isZh) "BellaBox: 代理通道" else "BellaBox: Proxy Tunnel"
         }
 
         val content = if (trafficSummary.isNotBlank()) {
             "$activeNodeName | $trafficSummary"
         } else {
-            "Active: $activeNodeName"
+            if (isZh) "当前节点: $activeNodeName" else "Active: $activeNodeName"
         }
+
+        val disconnectText = if (isZh) "断开连接" else "Disconnect"
 
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle(title)
@@ -75,7 +80,7 @@ class VpnNotificationManager(private val context: Context) {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Disconnect", disconnectPendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, disconnectText, disconnectPendingIntent)
             .build()
     }
 }
