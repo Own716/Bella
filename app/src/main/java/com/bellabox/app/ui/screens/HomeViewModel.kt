@@ -52,20 +52,24 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private fun loadActiveNode() {
         viewModelScope.launch(Dispatchers.IO) {
             settingsRepo.selectedNodeId.collectLatest { savedId ->
-                if (savedId != null) {
-                    val node = nodeRepo.getNodeById(savedId)
-                    if (node != null) {
-                        _activeNode.value = node
-                        return@collectLatest
+                try {
+                    if (savedId != null) {
+                        val node = nodeRepo.getNodeById(savedId)
+                        if (node != null) {
+                            _activeNode.value = node
+                            return@collectLatest
+                        }
                     }
-                }
-                val all = nodeRepo.getAllNodes()
-                if (all.isNotEmpty()) {
-                    val first = all.first()
-                    _activeNode.value = first
-                    settingsRepo.setSelectedNodeId(first.id)
-                } else {
-                    _activeNode.value = null
+                    val all = nodeRepo.getAllNodes()
+                    if (all.isNotEmpty()) {
+                        val first = all.first()
+                        _activeNode.value = first
+                        settingsRepo.setSelectedNodeId(first.id)
+                    } else {
+                        _activeNode.value = null
+                    }
+                } catch (e: Exception) {
+                    com.bellabox.core.common.AppLogger.e("HomeViewModel", "Error loading active node: ${e.message}", e)
                 }
             }
         }

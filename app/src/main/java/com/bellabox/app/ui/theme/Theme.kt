@@ -66,7 +66,9 @@ fun BellaBoxTheme(
                 window.navigationBarColor = android.graphics.Color.TRANSPARENT
                 val controller = WindowCompat.getInsetsController(window, view)
                 controller.isAppearanceLightStatusBars = !darkTheme
-                controller.isAppearanceLightNavigationBars = !darkTheme
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    controller.isAppearanceLightNavigationBars = !darkTheme
+                }
             }
         }
     }

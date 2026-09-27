@@ -30,6 +30,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="com.bellabox.app.crash.CrashActivity"
+            android:process=":crash"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.BellaBox" />
+
     </application>
 
 </manifest>
