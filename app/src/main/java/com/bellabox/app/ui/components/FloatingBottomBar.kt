@@ -2,7 +2,6 @@ package com.bellabox.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -31,17 +30,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bellabox.app.R
 import com.bellabox.app.ui.theme.BellaShapes
 
-enum class NavigationTab(val label: String, val icon: ImageVector) {
-    HOME("Home", Icons.Rounded.Home),
-    NODES("Nodes", Icons.Rounded.List),
-    GROUPS("Groups", Icons.Rounded.Hub),
-    RULES("Rules", Icons.Rounded.Route),
-    TOOLS("Tools", Icons.Rounded.Build),
-    SETTINGS("Settings", Icons.Rounded.Settings)
+enum class NavigationTab(val labelRes: Int, val icon: ImageVector) {
+    HOME(R.string.nav_home, Icons.Rounded.Home),
+    NODES(R.string.nav_nodes, Icons.Rounded.List),
+    GROUPS(R.string.nav_groups, Icons.Rounded.Hub),
+    RULES(R.string.nav_rules, Icons.Rounded.Route),
+    TOOLS(R.string.nav_tools, Icons.Rounded.Build),
+    SETTINGS(R.string.nav_settings, Icons.Rounded.Settings)
 }
 
 @Composable
@@ -83,6 +84,8 @@ fun FloatingBottomBar(
                         label = "tab_tint"
                     )
 
+                    val labelText = stringResource(tab.labelRes)
+
                     Column(
                         modifier = Modifier
                             .clip(BellaShapes.medium)
@@ -96,12 +99,12 @@ fun FloatingBottomBar(
                     ) {
                         Icon(
                             imageVector = tab.icon,
-                            contentDescription = tab.label,
+                            contentDescription = labelText,
                             tint = tint.value,
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = tab.label,
+                            text = labelText,
                             color = tint.value,
                             fontSize = 11.sp,
                             style = MaterialTheme.typography.labelSmall

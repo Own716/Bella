@@ -118,10 +118,10 @@ fun AboutScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InfoRow(label = "App Version", value = "1.0.0 (Build 100)")
-                InfoRow(label = "Sing-box Core", value = SingboxEngineAdapter.CORE_VERSION)
+                InfoRow(label = "App Version", value = "1.0.1-preview (Build 101)")
+                InfoRow(label = "Sing-box Core", value = SingboxEngineAdapter.getCoreVersion())
                 InfoRow(label = "Core Channel", value = "${SingboxEngineAdapter.CORE_CHANNEL} (Commit: ${SingboxEngineAdapter.CORE_COMMIT})")
-                InfoRow(label = "libbox Version", value = "1.15.0-alpha.9")
+                InfoRow(label = "libbox Version", value = SingboxEngineAdapter.getCoreVersion())
                 InfoRow(label = "Target ABI", value = Build.SUPPORTED_ABIS.firstOrNull() ?: "arm64-v8a")
                 InfoRow(label = "Android Version", value = "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})")
             }

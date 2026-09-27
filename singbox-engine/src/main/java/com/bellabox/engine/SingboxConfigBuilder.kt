@@ -6,6 +6,8 @@ import com.bellabox.core.model.ProxyNode
 import com.bellabox.core.model.RouteRule
 import com.bellabox.core.model.RuleActionType
 import com.bellabox.core.model.RuleType
+import com.bellabox.core.model.StrategyGroup
+import com.bellabox.core.model.StrategyType
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -13,6 +15,26 @@ class SingboxConfigBuilder {
 
     fun build(
         activeNode: ProxyNode,
+        dnsConfig: DnsConfiguration = DnsConfiguration(),
+        customRules: List<RouteRule> = emptyList(),
+        excludedPackages: List<String> = emptyList(),
+        includedPackages: List<String> = emptyList()
+    ): String {
+        return buildComplete(
+            activeNode = activeNode,
+            allNodes = listOf(activeNode),
+            strategyGroups = emptyList(),
+            dnsConfig = dnsConfig,
+            customRules = customRules,
+            excludedPackages = excludedPackages,
+            includedPackages = includedPackages
+        )
+    }
+
+    fun buildComplete(
+        activeNode: ProxyNode?,
+        allNodes: List<ProxyNode> = emptyList(),
+        strategyGroups: List<StrategyGroup> = emptyList(),
         dnsConfig: DnsConfiguration = DnsConfiguration(),
         customRules: List<RouteRule> = emptyList(),
         excludedPackages: List<String> = emptyList(),
@@ -30,13 +52,13 @@ class SingboxConfigBuilder {
         // 2. DNS configuration (1.15.0 official modern format)
         root.put("dns", buildDnsBlock(dnsConfig))
 
-        // 3. Inbound configuration (TUN)
+        // 3. Inbound configuration (TUN with Sing-box 1.15 native sing-tun stack)
         root.put("inbounds", JSONArray().apply {
             put(buildTunInbound(excludedPackages, includedPackages))
         })
 
         // 4. Outbound configuration
-        root.put("outbounds", buildOutbounds(activeNode))
+        root.put("outbounds", buildOutbounds(activeNode, allNodes, strategyGroups))
 
         // 5. Route configuration
         root.put("route", buildRouteBlock(customRules))
@@ -117,7 +139,7 @@ class SingboxConfigBuilder {
             put("mtu", 9000)
             put("auto_route", true)
             put("strict_route", true)
-            put("stack", "system")
+            // stack is deliberately omitted in sing-box 1.15 to utilize native sing-tun TCP/IP stack
             put("sniff", true)
             put("sniff_override_destination", false)
 
@@ -129,12 +151,99 @@ class SingboxConfigBuilder {
         }
     }
 
-    private fun buildOutbounds(node: ProxyNode): JSONArray {
+    private fun buildOutbounds(
+        activeNode: ProxyNode?,
+        allNodes: List<ProxyNode>,
+        strategyGroups: List<StrategyGroup>
+    ): JSONArray {
         val outbounds = JSONArray()
+        val generatedNodeTags = mutableSetOf<String>()
 
-        // 1. Active proxy outbound
-        val proxy = JSONObject().apply {
-            put("tag", "proxy")
+        // 1. If active node is specified, ensure it has a primary "proxy" outbound
+        if (activeNode != null) {
+            val primaryOutbound = buildSingleNodeOutbound(activeNode, tag = "proxy")
+            outbounds.put(primaryOutbound)
+            generatedNodeTags.add("proxy")
+        }
+
+        // 2. Add individual node outbounds
+        val nodesToProcess = if (allNodes.isNotEmpty()) allNodes else (if (activeNode != null) listOf(activeNode) else emptyList())
+        for (node in nodesToProcess) {
+            val nodeTag = "node_${node.id}"
+            if (!generatedNodeTags.contains(nodeTag)) {
+                outbounds.put(buildSingleNodeOutbound(node, tag = nodeTag))
+                generatedNodeTags.add(nodeTag)
+            }
+        }
+
+        // 3. Add strategy groups if configured
+        for (group in strategyGroups) {
+            val groupJson = JSONObject().apply {
+                put("tag", group.tag)
+                when (group.type) {
+                    StrategyType.URLTEST -> {
+                        put("type", "urltest")
+                        put("url", group.urlTestUrl)
+                        put("interval", "${group.urlTestIntervalMinutes}m")
+                        put("tolerance", group.urlTestToleranceMs)
+                    }
+                    else -> {
+                        put("type", "selector")
+                        if (group.selectedNodeId != null) {
+                            put("default", "node_${group.selectedNodeId}")
+                        }
+                    }
+                }
+                val memberOutbounds = JSONArray()
+                if (group.nodeIds.isNotEmpty()) {
+                    for (nid in group.nodeIds) {
+                        memberOutbounds.put("node_$nid")
+                    }
+                } else {
+                    for (node in nodesToProcess) {
+                        memberOutbounds.put("node_${node.id}")
+                    }
+                }
+                if (memberOutbounds.length() == 0 && activeNode != null) {
+                    memberOutbounds.put("proxy")
+                }
+                put("outbounds", memberOutbounds)
+            }
+            outbounds.put(groupJson)
+        }
+
+        // 4. If neither activeNode nor individual nodes were provided, fallback to dummy direct to avoid empty outbounds
+        if (outbounds.length() == 0) {
+            outbounds.put(JSONObject().apply {
+                put("tag", "proxy")
+                put("type", "direct")
+            })
+        }
+
+        // 5. System direct outbound
+        outbounds.put(JSONObject().apply {
+            put("tag", "direct")
+            put("type", "direct")
+        })
+
+        // 6. Block outbound
+        outbounds.put(JSONObject().apply {
+            put("tag", "block")
+            put("type", "block")
+        })
+
+        // 7. DNS-out outbound
+        outbounds.put(JSONObject().apply {
+            put("tag", "dns-out")
+            put("type", "dns")
+        })
+
+        return outbounds
+    }
+
+    private fun buildSingleNodeOutbound(node: ProxyNode, tag: String): JSONObject {
+        return JSONObject().apply {
+            put("tag", tag)
             put("type", node.protocol.name.lowercase())
             put("server", node.server)
             put("port", node.port)
@@ -176,35 +285,32 @@ class SingboxConfigBuilder {
                     put("tls", buildTlsBlock(node))
                 }
                 ProtocolType.TUIC -> {
-                    put("uuid", node.uuid)
+                    if (node.uuid.isNotBlank()) put("uuid", node.uuid)
                     put("password", node.password)
                     put("congestion_control", "bbr")
                     put("tls", buildTlsBlock(node))
                 }
-                else -> {}
+                ProtocolType.WIREGUARD -> {
+                    put("system_interface", false)
+                    put("interface_name", "wg0")
+                    put("local_address", JSONArray().apply { put("10.0.0.2/32") })
+                    put("private_key", node.password)
+                    put("peer_public_key", node.publicKey)
+                }
+                ProtocolType.SOCKS -> {
+                    put("version", "5")
+                    if (node.uuid.isNotBlank()) put("username", node.uuid)
+                    if (node.password.isNotBlank()) put("password", node.password)
+                }
+                ProtocolType.HTTP -> {
+                    if (node.uuid.isNotBlank()) put("username", node.uuid)
+                    if (node.password.isNotBlank()) put("password", node.password)
+                    if (node.security == "tls") {
+                        put("tls", buildTlsBlock(node))
+                    }
+                }
             }
         }
-        outbounds.put(proxy)
-
-        // 2. Direct outbound
-        outbounds.put(JSONObject().apply {
-            put("tag", "direct")
-            put("type", "direct")
-        })
-
-        // 3. Block outbound
-        outbounds.put(JSONObject().apply {
-            put("tag", "block")
-            put("type", "block")
-        })
-
-        // 4. DNS-out outbound
-        outbounds.put(JSONObject().apply {
-            put("tag", "dns-out")
-            put("type", "dns")
-        })
-
-        return outbounds
     }
 
     private fun buildTlsBlock(node: ProxyNode): JSONObject {
@@ -264,8 +370,8 @@ class SingboxConfigBuilder {
             put("outbound", "direct")
         })
 
-        // Add custom rules from user settings
-        for (custom in customRules.filter { it.isEnabled }) {
+        // Add custom rules from user settings ordered by priority
+        for (custom in customRules.filter { it.isEnabled }.sortedBy { it.priority }) {
             val ruleJson = JSONObject()
             val valsArray = JSONArray(custom.values)
             when (custom.ruleType) {

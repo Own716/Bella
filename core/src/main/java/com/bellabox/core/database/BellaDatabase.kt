@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [
@@ -12,7 +14,7 @@ import androidx.room.RoomDatabase
         StrategyGroupEntity::class,
         RouteRuleEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class BellaDatabase : RoomDatabase() {
@@ -25,13 +27,21 @@ abstract class BellaDatabase : RoomDatabase() {
         @Volatile
         private var instance: BellaDatabase? = null
 
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_proxy_nodes_subscription ON proxy_nodes(subscriptionId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_proxy_nodes_fingerprint ON proxy_nodes(fingerprintHash)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS idx_route_rules_priority ON route_rules(priority)")
+            }
+        }
+
         fun getInstance(context: Context): BellaDatabase {
             return instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     BellaDatabase::class.java,
                     "bellabox.db"
-                ).fallbackToDestructiveMigration().build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
             }
         }
     }

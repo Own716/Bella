@@ -31,15 +31,22 @@ class SingboxEngineAdapter(
         const val CORE_VERSION = "1.15.0-alpha.9"
         const val CORE_CHANNEL = "testing"
         const val CORE_COMMIT = "af60b5e"
+
+        private val _trafficStats = MutableStateFlow(TrafficStats())
+        val trafficStats: StateFlow<TrafficStats> = _trafficStats.asStateFlow()
+
+        fun getCoreVersion(): String {
+            return try {
+                Libbox.version()
+            } catch (e: Throwable) {
+                CORE_VERSION
+            }
+        }
     }
 
     private var commandServer: CommandServer? = null
     private val adapterScope = CoroutineScope(Dispatchers.IO + Job())
     private var trafficMonitorJob: Job? = null
-
-    private val _trafficStats = MutableStateFlow(TrafficStats())
-    val trafficStats: StateFlow<TrafficStats> = _trafficStats.asStateFlow()
-
     private var connectedStartTime = 0L
 
     fun setup(baseDir: File, workingDir: File, tempDir: File) {
@@ -51,11 +58,11 @@ class SingboxEngineAdapter(
                 logMaxLines = 2000
                 debug = false
                 crashReportSource = "BellaBox"
-                appVersion = "1.0.0"
-                appMarketingVersion = "1.0.0"
+                appVersion = "1.0.1-preview"
+                appMarketingVersion = "1.0.1"
             }
             Libbox.setup(setupOptions)
-            AppLogger.i(TAG, "Libbox setup completed successfully (Core: $CORE_VERSION)")
+            AppLogger.i(TAG, "Libbox setup completed successfully (Core: ${getCoreVersion()})")
         } catch (e: Exception) {
             AppLogger.e(TAG, "Failed to setup Libbox: ${e.message}", e)
         }
@@ -115,25 +122,31 @@ class SingboxEngineAdapter(
     private fun startTrafficMonitor() {
         stopTrafficMonitor()
         trafficMonitorJob = adapterScope.launch {
-            var lastTotalUp = 0L
-            var lastTotalDown = 0L
+            val myUid = android.os.Process.myUid()
+            val initialTx = android.net.TrafficStats.getUidTxBytes(myUid).let { if (it < 0) 0L else it }
+            val initialRx = android.net.TrafficStats.getUidRxBytes(myUid).let { if (it < 0) 0L else it }
+            var prevTx = initialTx
+            var prevRx = initialRx
+
             while (isActive) {
                 delay(1000)
                 val duration = if (connectedStartTime > 0) (System.currentTimeMillis() - connectedStartTime) / 1000 else 0
-                // Collect real traffic stats from socket/tunnel layer
-                // In production, Libbox provides client command counters
-                val currentTotalUp = lastTotalUp + (0..1024).random()
-                val currentTotalDown = lastTotalDown + (0..4096).random()
-                val upSpeed = currentTotalUp - lastTotalUp
-                val downSpeed = currentTotalDown - lastTotalDown
-                lastTotalUp = currentTotalUp
-                lastTotalDown = currentTotalDown
+                val curTx = android.net.TrafficStats.getUidTxBytes(myUid).let { if (it < 0) 0L else it }
+                val curRx = android.net.TrafficStats.getUidRxBytes(myUid).let { if (it < 0) 0L else it }
+
+                val upSpeed = (curTx - prevTx).coerceAtLeast(0L)
+                val downSpeed = (curRx - prevRx).coerceAtLeast(0L)
+                val totalUp = (curTx - initialTx).coerceAtLeast(0L)
+                val totalDown = (curRx - initialRx).coerceAtLeast(0L)
+
+                prevTx = curTx
+                prevRx = curRx
 
                 _trafficStats.value = TrafficStats(
                     uplinkSpeedBytesPerSec = upSpeed,
                     downlinkSpeedBytesPerSec = downSpeed,
-                    totalUplinkBytes = currentTotalUp,
-                    totalDownlinkBytes = currentTotalDown,
+                    totalUplinkBytes = totalUp,
+                    totalDownlinkBytes = totalDown,
                     connectedDurationSeconds = duration
                 )
             }

@@ -113,6 +113,9 @@ object NodeUriParser {
                 trimmed.startsWith("ss://", ignoreCase = true) -> parseShadowsocks(trimmed)
                 trimmed.startsWith("hysteria2://", ignoreCase = true) || trimmed.startsWith("hy2://", ignoreCase = true) -> parseHysteria2(trimmed)
                 trimmed.startsWith("tuic://", ignoreCase = true) -> parseTuic(trimmed)
+                trimmed.startsWith("wireguard://", ignoreCase = true) || trimmed.startsWith("wg://", ignoreCase = true) -> parseWireguard(trimmed)
+                trimmed.startsWith("socks5://", ignoreCase = true) || trimmed.startsWith("socks://", ignoreCase = true) -> parseSocks(trimmed)
+                trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true) -> parseHttp(trimmed)
                 else -> null
             }
         } catch (e: Exception) {
@@ -290,6 +293,67 @@ object NodeUriParser {
             password = password,
             security = "tls",
             sni = sni
+        )
+    }
+
+    private fun parseWireguard(uriStr: String): ProxyNode? {
+        val uri = ParsedUri.parse(uriStr) ?: return null
+        val host = uri.host
+        val port = uri.port.takeIf { it != -1 } ?: 51820
+        val name = decodeFragment(uri.fragment, "WireGuard-$host")
+        val privateKey = uri.userInfo ?: uri.getQueryParameter("privatekey") ?: ""
+        val publicKey = uri.getQueryParameter("publickey") ?: ""
+        val presharedKey = uri.getQueryParameter("presharedkey") ?: ""
+
+        return ProxyNode(
+            name = name,
+            server = host,
+            port = port,
+            protocol = ProtocolType.WIREGUARD,
+            password = privateKey,
+            publicKey = publicKey,
+            shortId = presharedKey
+        )
+    }
+
+    private fun parseSocks(uriStr: String): ProxyNode? {
+        val uri = ParsedUri.parse(uriStr) ?: return null
+        val host = uri.host
+        val port = uri.port.takeIf { it != -1 } ?: 1080
+        val name = decodeFragment(uri.fragment, "SOCKS5-$host:$port")
+        val userInfo = uri.userInfo ?: ""
+        val user = if (userInfo.contains(":")) userInfo.substringBefore(":") else userInfo
+        val pass = if (userInfo.contains(":")) userInfo.substringAfter(":") else ""
+
+        return ProxyNode(
+            name = name,
+            server = host,
+            port = port,
+            protocol = ProtocolType.SOCKS,
+            uuid = user,
+            password = pass
+        )
+    }
+
+    private fun parseHttp(uriStr: String): ProxyNode? {
+        val uri = ParsedUri.parse(uriStr) ?: return null
+        val host = uri.host
+        val port = uri.port.takeIf { it != -1 } ?: 8080
+        val name = decodeFragment(uri.fragment, "HTTP-$host:$port")
+        val userInfo = uri.userInfo ?: ""
+        val user = if (userInfo.contains(":")) userInfo.substringBefore(":") else userInfo
+        val pass = if (userInfo.contains(":")) userInfo.substringAfter(":") else ""
+        val isTls = uri.scheme.equals("https", ignoreCase = true)
+
+        return ProxyNode(
+            name = name,
+            server = host,
+            port = port,
+            protocol = ProtocolType.HTTP,
+            uuid = user,
+            password = pass,
+            security = if (isTls) "tls" else "none",
+            sni = uri.getQueryParameter("sni") ?: host
         )
     }
 

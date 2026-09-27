@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -21,18 +22,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.bellabox.app.ui.components.FloatingBottomBar
 import com.bellabox.app.ui.components.NavigationTab
 import com.bellabox.app.ui.screens.AboutScreen
 import com.bellabox.app.ui.screens.GroupsScreen
+import com.bellabox.app.ui.screens.GroupsViewModel
 import com.bellabox.app.ui.screens.HomeScreen
 import com.bellabox.app.ui.screens.HomeViewModel
 import com.bellabox.app.ui.screens.NodesScreen
 import com.bellabox.app.ui.screens.NodesViewModel
 import com.bellabox.app.ui.screens.RulesScreen
+import com.bellabox.app.ui.screens.RulesViewModel
 import com.bellabox.app.ui.screens.SettingsScreen
+import com.bellabox.app.ui.screens.SettingsViewModel
 import com.bellabox.app.ui.screens.ToolsScreen
 import com.bellabox.app.ui.theme.BellaBoxTheme
 
@@ -40,6 +43,9 @@ class MainActivity : ComponentActivity() {
 
     private val homeViewModel: HomeViewModel by viewModels()
     private val nodesViewModel: NodesViewModel by viewModels()
+    private val groupsViewModel: GroupsViewModel by viewModels()
+    private val rulesViewModel: RulesViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
 
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -56,7 +62,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            BellaBoxTheme {
+            val themeMode by settingsViewModel.themeMode.collectAsState()
+            val dynamicColor by settingsViewModel.dynamicColor.collectAsState()
+            val isDark = when (themeMode) {
+                "dark" -> true
+                "light" -> false
+                else -> isSystemInDarkTheme()
+            }
+
+            BellaBoxTheme(darkTheme = isDark, dynamicColor = dynamicColor) {
                 var currentTab by remember { mutableStateOf(NavigationTab.HOME) }
                 var showingAbout by remember { mutableStateOf(false) }
 
@@ -107,16 +121,17 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 NavigationTab.GROUPS -> {
-                                    GroupsScreen()
+                                    GroupsScreen(viewModel = groupsViewModel)
                                 }
                                 NavigationTab.RULES -> {
-                                    RulesScreen()
+                                    RulesScreen(viewModel = rulesViewModel)
                                 }
                                 NavigationTab.TOOLS -> {
                                     ToolsScreen()
                                 }
                                 NavigationTab.SETTINGS -> {
                                     SettingsScreen(
+                                        viewModel = settingsViewModel,
                                         onNavigateToAbout = { showingAbout = true }
                                     )
                                 }

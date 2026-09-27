@@ -69,6 +69,15 @@ interface RouteRuleDao {
     @Delete
     suspend fun delete(rule: RouteRuleEntity)
 
+    @Query("SELECT * FROM route_rules WHERE id = :id LIMIT 1")
+    suspend fun getRuleById(id: Long): RouteRuleEntity?
+
     @Query("UPDATE route_rules SET isEnabled = :enabled WHERE id = :id")
     suspend fun updateEnabled(id: Long, enabled: Boolean)
+
+    @Query("UPDATE route_rules SET priority = :priority WHERE id = :id")
+    suspend fun updatePriority(id: Long, priority: Int)
+
+    @Query("DELETE FROM route_rules")
+    suspend fun deleteAll()
 }

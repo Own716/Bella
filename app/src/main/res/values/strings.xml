@@ -1,53 +1,67 @@
 <resources>
     <string name="app_name">BellaBox</string>
-    <string name="nav_home">Home</string>
-    <string name="nav_nodes">Nodes</string>
-    <string name="nav_groups">Groups</string>
-    <string name="nav_rules">Rules</string>
-    <string name="nav_tools">Tools</string>
-    <string name="nav_settings">Settings</string>
-    <string name="nav_about">About</string>
+    <string name="nav_home">首页</string>
+    <string name="nav_nodes">节点与订阅</string>
+    <string name="nav_groups">策略组</string>
+    <string name="nav_rules">路由分流</string>
+    <string name="nav_tools">网络工具</string>
+    <string name="nav_settings">系统设置</string>
+    <string name="nav_about">关于 BellaBox</string>
 
-    <string name="status_idle">Disconnected</string>
-    <string name="status_starting">Starting service&#8230;</string>
-    <string name="status_connecting">Connecting tunnel&#8230;</string>
-    <string name="status_connected">Connected</string>
-    <string name="status_reconnecting">Reconnecting&#8230;</string>
-    <string name="status_stopping">Stopping service&#8230;</string>
-    <string name="status_stopped">Stopped</string>
-    <string name="status_failed">Connection Failed</string>
+    <string name="status_idle">未连接</string>
+    <string name="status_starting">正在启动核心&#8230;</string>
+    <string name="status_connecting">正在建立隧道&#8230;</string>
+    <string name="status_connected">已安全连接</string>
+    <string name="status_reconnecting">网络波动重连中&#8230;</string>
+    <string name="status_stopping">正在断开服务&#8230;</string>
+    <string name="status_stopped">服务已停止</string>
+    <string name="status_failed">连接发生错误</string>
 
-    <string name="action_connect">CONNECT</string>
-    <string name="action_disconnect">DISCONNECT</string>
-    <string name="action_cancel">Cancel</string>
-    <string name="action_save">Save</string>
-    <string name="action_delete">Delete</string>
-    <string name="action_test_speed">Test Latency</string>
-    <string name="action_add_node">Add Node</string>
-    <string name="action_import_sub">Import Subscription</string>
+    <string name="action_connect">一键连接</string>
+    <string name="action_disconnect">断开连接</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_save">保存</string>
+    <string name="action_delete">删除</string>
+    <string name="action_edit">编辑</string>
+    <string name="action_test_speed">测速</string>
+    <string name="action_test_all">全部测速</string>
+    <string name="action_add_node">添加节点</string>
+    <string name="action_add_sub">添加订阅</string>
+    <string name="action_update_sub">立即更新</string>
+    <string name="action_import_sub">导入订阅</string>
+    <string name="action_reset_rules">恢复默认规则</string>
 
-    <string name="card_active_node">Active Node</string>
-    <string name="card_live_traffic">Traffic Flow</string>
-    <string name="card_total_traffic">Total Traffic</string>
-    <string name="card_network_info">Network Status</string>
-    <string name="card_latency">Latency</string>
-    <string name="card_uplink">Upload</string>
-    <string name="card_downlink">Download</string>
+    <string name="tab_nodes">节点列表</string>
+    <string name="tab_subscriptions">订阅管理</string>
 
-    <string name="nodes_empty_title">No Proxy Nodes Found</string>
-    <string name="nodes_empty_desc">Import a subscription or add custom server nodes to get started.</string>
-    <string name="nodes_search_hint">Search nodes by name, country or protocol</string>
-    <string name="nodes_sort_latency">Lowest Latency</string>
-    <string name="nodes_sort_name">Name</string>
-    <string name="nodes_sort_default">Default</string>
+    <string name="card_active_node">当前选中节点</string>
+    <string name="card_live_traffic">实时速率</string>
+    <string name="card_total_traffic">累计流量</string>
+    <string name="card_network_info">连接状态</string>
+    <string name="card_latency">延迟</string>
+    <string name="card_uplink">上行</string>
+    <string name="card_downlink">下行</string>
 
-    <string name="groups_title">Strategy Groups</string>
-    <string name="rules_title">Routing Rules</string>
-    <string name="dns_title">DNS Configuration</string>
-    <string name="speedtest_title">Speed Test &amp; Quality</string>
-    <string name="tools_title">Network Tools</string>
-    <string name="settings_title">Settings</string>
-    <string name="about_title">About BellaBox</string>
+    <string name="nodes_empty_title">暂无可用节点</string>
+    <string name="nodes_empty_desc">请导入您的代理订阅链接或手动添加节点。</string>
+    <string name="nodes_search_hint">搜索节点名称、服务器或协议</string>
+    <string name="nodes_sort_latency">按延迟排序</string>
+    <string name="nodes_sort_name">按名称排序</string>
+    <string name="nodes_sort_default">默认排序</string>
 
-    <string name="vpn_permission_required">VPN permission is required to route network traffic.</string>
+    <string name="groups_title">分流策略组</string>
+    <string name="groups_subtitle">自适应故障转移、多线路负载与延迟择优</string>
+    <string name="action_add_group">新建策略组</string>
+
+    <string name="rules_title">路由分流规则</string>
+    <string name="rules_subtitle">高优先级规则自上而下匹配执行</string>
+    <string name="action_add_rule">添加自定义规则</string>
+
+    <string name="dns_title">DNS 解析配置</string>
+    <string name="speedtest_title">测速与健康评估</string>
+    <string name="tools_title">网络实用工具</string>
+    <string name="settings_title">个性化与内核参数</string>
+    <string name="about_title">关于 BellaBox</string>
+
+    <string name="vpn_permission_required">需要授予 VPN 权限以建立安全代理通道。</string>
 </resources>

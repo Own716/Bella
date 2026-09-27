@@ -104,6 +104,9 @@ interface NodeDao {
     @Query("SELECT * FROM proxy_nodes ORDER BY isFavorite DESC, latencyMs ASC, id ASC")
     fun getAllNodesFlow(): Flow<List<NodeEntity>>
 
+    @Query("SELECT * FROM proxy_nodes WHERE isFavorite = 1 ORDER BY latencyMs ASC, id ASC")
+    fun getFavoriteNodesFlow(): Flow<List<NodeEntity>>
+
     @Query("SELECT * FROM proxy_nodes ORDER BY isFavorite DESC, latencyMs ASC, id ASC")
     suspend fun getAllNodes(): List<NodeEntity>
 
@@ -113,8 +116,17 @@ interface NodeDao {
     @Query("SELECT * FROM proxy_nodes WHERE subscriptionId = :subId")
     suspend fun getNodesBySubscription(subId: Long): List<NodeEntity>
 
+    @Query("SELECT * FROM proxy_nodes WHERE subscriptionId = :subId")
+    suspend fun getNodesBySubscriptionId(subId: Long): List<NodeEntity>
+
     @Query("SELECT * FROM proxy_nodes WHERE fingerprintHash = :hash LIMIT 1")
     suspend fun getNodeByFingerprint(hash: String): NodeEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(node: NodeEntity): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(nodes: List<NodeEntity>): List<Long>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNode(node: NodeEntity): Long
@@ -123,13 +135,25 @@ interface NodeDao {
     suspend fun insertNodes(nodes: List<NodeEntity>): List<Long>
 
     @Update
+    suspend fun update(node: NodeEntity)
+
+    @Update
     suspend fun updateNode(node: NodeEntity)
+
+    @Delete
+    suspend fun delete(node: NodeEntity)
 
     @Delete
     suspend fun deleteNode(node: NodeEntity)
 
     @Query("DELETE FROM proxy_nodes WHERE subscriptionId = :subId")
     suspend fun deleteBySubscription(subId: Long)
+
+    @Query("DELETE FROM proxy_nodes WHERE subscriptionId = :subId")
+    suspend fun deleteBySubscriptionId(subId: Long)
+
+    @Query("DELETE FROM proxy_nodes")
+    suspend fun deleteAll()
 
     @Query("UPDATE proxy_nodes SET latencyMs = :latency, qualityScore = :score, lastTestTime = :testTime WHERE id = :id")
     suspend fun updateLatency(id: Long, latency: Long, score: Int, testTime: Long)

@@ -6,10 +6,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.bellabox.app.BellaApplication
 import com.bellabox.core.model.ConnectionState
+import com.bellabox.core.model.DnsConfiguration
 import com.bellabox.core.model.ProxyNode
 import com.bellabox.core.model.TrafficStats
 import com.bellabox.engine.ConnectionStateMachine
 import com.bellabox.engine.SingboxConfigBuilder
+import com.bellabox.engine.SingboxEngineAdapter
 import com.bellabox.vpn.BellaVpnService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,11 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val db = (application as BellaApplication).database
+    private val app = application as BellaApplication
+    private val nodeRepo = app.nodeRepository
+    private val ruleRepo = app.ruleRepository
+    private val groupRepo = app.strategyGroupRepository
+    private val settingsRepo = app.settingsRepository
     private val configBuilder = SingboxConfigBuilder()
 
     val connectionState: StateFlow<ConnectionState> = ConnectionStateMachine.state
@@ -29,8 +35,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _activeNode = MutableStateFlow<ProxyNode?>(null)
     val activeNode: StateFlow<ProxyNode?> = _activeNode.asStateFlow()
 
-    private val _trafficStats = MutableStateFlow(TrafficStats())
-    val trafficStats: StateFlow<TrafficStats> = _trafficStats.asStateFlow()
+    // 100% real traffic stats from SingboxEngineAdapter and android.net.TrafficStats
+    val trafficStats: StateFlow<TrafficStats> = SingboxEngineAdapter.trafficStats
 
     private val _downloadHistory = MutableStateFlow<List<Long>>(listOf(0L, 0L))
     val downloadHistory: StateFlow<List<Long>> = _downloadHistory.asStateFlow()
@@ -39,45 +45,39 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val uploadHistory: StateFlow<List<Long>> = _uploadHistory.asStateFlow()
 
     init {
-        loadInitialNode()
-        observeTraffic()
+        loadActiveNode()
+        observeRealTraffic()
     }
 
-    private fun loadInitialNode() {
+    private fun loadActiveNode() {
         viewModelScope.launch(Dispatchers.IO) {
-            val all = db.nodeDao().getAllNodes()
-            if (all.isNotEmpty()) {
-                _activeNode.value = all.first().toModel()
+            settingsRepo.selectedNodeId.collectLatest { savedId ->
+                if (savedId != null) {
+                    val node = nodeRepo.getNodeById(savedId)
+                    if (node != null) {
+                        _activeNode.value = node
+                        return@collectLatest
+                    }
+                }
+                val all = nodeRepo.getAllNodes()
+                if (all.isNotEmpty()) {
+                    val first = all.first()
+                    _activeNode.value = first
+                    settingsRepo.setSelectedNodeId(first.id)
+                } else {
+                    _activeNode.value = null
+                }
             }
         }
     }
 
-    private fun observeTraffic() {
+    private fun observeRealTraffic() {
         viewModelScope.launch(Dispatchers.Default) {
-            // Emulate traffic sample aggregation for smooth chart curve (last 25 seconds)
-            connectionState.collectLatest { state ->
-                if (state == ConnectionState.CONNECTED) {
-                    var curUp = 0L
-                    var curDown = 0L
-                    while (ConnectionStateMachine.currentState == ConnectionState.CONNECTED) {
-                        kotlinx.coroutines.delay(1000)
-                        val sampleDown = (1024L..1024L * 512).random()
-                        val sampleUp = (512L..1024L * 128).random()
-                        curDown += sampleDown
-                        curUp += sampleUp
-
-                        _trafficStats.value = TrafficStats(
-                            uplinkSpeedBytesPerSec = sampleUp,
-                            downlinkSpeedBytesPerSec = sampleDown,
-                            totalUplinkBytes = curUp,
-                            totalDownlinkBytes = curDown
-                        )
-
-                        _downloadHistory.value = (_downloadHistory.value + sampleDown).takeLast(25)
-                        _uploadHistory.value = (_uploadHistory.value + sampleUp).takeLast(25)
-                    }
+            SingboxEngineAdapter.trafficStats.collectLatest { stats ->
+                if (ConnectionStateMachine.currentState == ConnectionState.CONNECTED) {
+                    _downloadHistory.value = (_downloadHistory.value + stats.downlinkSpeedBytesPerSec).takeLast(25)
+                    _uploadHistory.value = (_uploadHistory.value + stats.uplinkSpeedBytesPerSec).takeLast(25)
                 } else {
-                    _trafficStats.value = TrafficStats()
                     _downloadHistory.value = listOf(0L, 0L)
                     _uploadHistory.value = listOf(0L, 0L)
                 }
@@ -87,8 +87,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun selectNode(node: ProxyNode) {
         _activeNode.value = node
+        settingsRepo.setSelectedNodeId(node.id)
         if (connectionState.value == ConnectionState.CONNECTED) {
-            // Hot reload tunnel with new node
             connect()
         }
     }
@@ -113,9 +113,20 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val rules = db.routeRuleDao().getAllRules().map { it.toModel() }
-                val configJson = configBuilder.build(
+                val allNodes = nodeRepo.getAllNodes()
+                val rules = ruleRepo.getAllRules()
+                val groups = groupRepo.getAllGroups()
+                val dnsConfig = DnsConfiguration(
+                    directDns = settingsRepo.dnsDirect.value,
+                    proxyDns = settingsRepo.dnsRemote.value,
+                    fakeIpEnabled = settingsRepo.fakeIpEnabled.value
+                )
+
+                val configJson = configBuilder.buildComplete(
                     activeNode = node,
+                    allNodes = allNodes,
+                    strategyGroups = groups,
+                    dnsConfig = dnsConfig,
                     customRules = rules
                 )
                 BellaVpnService.startService(getApplication(), configJson, node.name)

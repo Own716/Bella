@@ -66,6 +66,6 @@ data class ProxyNode(
      * Prevents duplicate nodes from the same or different subscriptions.
      */
     fun computeFingerprint(): String {
-        return "${protocol.name}:${server.lowercase()}:$port:${uuid.ifEmpty { password }}:$sni:$transport:$transportPath"
+        return "${protocol.name}:${server.lowercase()}:$port:${uuid.ifEmpty { password }}:$sni:$transport:$transportPath:$publicKey:$shortId"
     }
 }
